@@ -1,0 +1,25 @@
+import { useMemo } from 'react';
+import { useQueries } from '@tanstack/react-query';
+import { pokedexApi } from '../api/pokedex.api.js';
+import { pokedexKeys } from '../api/pokedex.keys.js';
+import type { CatalogEntry, PokemonDetail } from '../domain/pokemon.types.js';
+
+// Batches per-entry detail fetches to hydrate elemental types and height (list endpoint omits them).
+export function usePokemonTypes(entries: CatalogEntry[]): CatalogEntry[] {
+  const detailQueries = useQueries({
+    queries: entries.map((entry) => ({
+      queryKey: pokedexKeys.detail(entry.name),
+      queryFn: () => pokedexApi.getByName(entry.name),
+      staleTime: Infinity,
+    })),
+  });
+
+  return useMemo(
+    () =>
+      entries.map((entry, index) => {
+        const detail = detailQueries[index]?.data as PokemonDetail | undefined;
+        return detail ? { ...entry, types: detail.types, height: detail.height } : entry;
+      }),
+    [entries, detailQueries],
+  );
+}

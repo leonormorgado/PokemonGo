@@ -1,0 +1,123 @@
+{
+  "common": {
+    "close": "Fechar"
+  },
+  "app": {
+    "title": "Pokédex Mestre Pokémon"
+  },
+  "topBar": {
+    "primaryNav": "Navegação principal",
+    "allPokemon": "Todos os Pokémon",
+    "myDeck": "O Meu Deck",
+    "switchLanguage": "{{language}}"
+  },
+  "dashboard": {
+    "searchPlaceholder": "Pesquisar Pokémon...",
+    "caughtOnly": "Apenas capturados",
+    "exportCsv": "Exportar CSV",
+    "share": "Partilhar",
+    "shareStatus": {
+      "shared": "Partilhado!",
+      "copied": "Copiado para a área de transferência",
+      "downloaded": "Descarregado (partilha indisponível)"
+    },
+    "viewGrid": "Grelha",
+    "viewTable": "Tabela",
+    "loading": "A carregar Pokédex...",
+    "selectedCount": "{{count}} selecionados",
+    "releaseSelected": "Libertar selecionados",
+    "clearSelection": "Limpar",
+    "selectMultiple": "Libertar Vários",
+    "exitSelectMode": "Concluído",
+    "sortBy": "Ordenar por",
+    "sortOptions": {
+      "nameAsc": "Nome (A-Z)",
+      "nameDesc": "Nome (Z-A)",
+      "caughtAtDesc": "Capturados Recentemente",
+      "caughtAtAsc": "Capturados Há Mais Tempo",
+      "heightAsc": "Altura (Menor-Maior)",
+      "heightDesc": "Altura (Maior-Menor)"
+    },
+    "typeFilter": "Tipos",
+    "clearTypeFilter": "Limpar"
+  },
+  "card": {
+    "caught": "Capturado",
+    "catch": "Capturar",
+    "release": "Libertar",
+    "viewDetails": "Ver detalhes de {{name}}",
+    "selectAria": "Selecionar {{name}} para libertar",
+    "share": "Partilhar",
+    "shareAria": "Partilhar {{name}}",
+    "shareStatus": {
+      "shared": "Partilhado!",
+      "copied": "Link copiado!"
+    },
+    "notAddedToPokedex": "Ainda não adicionado à Pokédex",
+    "shuffleColorScheme": "Baralhar Esquema de Cores",
+    "statAbbr": {
+      "hp": "PV",
+      "attack": "ATQ",
+      "defense": "DEF",
+      "specialAttack": "ATQ.ESP",
+      "specialDefense": "DEF.ESP",
+      "speed": "VEL"
+    }
+  },
+  "table": {
+    "selectAllAria": "Selecionar todos os Pokémon capturados",
+    "caught": "Capturado",
+    "catch": "Capturar",
+    "release": "Libertar",
+    "columns": {
+      "select": "",
+      "status": "Estado",
+      "name": "Nome",
+      "types": "Tipos",
+      "caughtAt": "Capturado",
+      "hp": "PV",
+      "attack": "Ataque",
+      "defense": "Defesa",
+      "speed": "Velocidade",
+      "height": "Altura",
+      "weight": "Peso"
+    },
+    "loadingCell": "…",
+    "emptyCell": "—"
+  },
+  "detail": {
+    "loading": "A carregar detalhes...",
+    "heightWeight": "Altura: {{height}} · Peso: {{weight}}",
+    "caughtOn": "Capturado: {{date}}",
+    "notCaught": "Ainda não capturado",
+    "baseStats": "Estatísticas Base",
+    "notes": "Notas",
+    "share": "Partilhar",
+    "shareStatus": {
+      "shared": "Partilhado!",
+      "copied": "Link copiado!"
+    },
+    "stats": {
+      "hp": "PV",
+      "attack": "Ataque",
+      "defense": "Defesa",
+      "specialAttack": "Ataque Esp.",
+      "specialDefense": "Defesa Esp.",
+      "speed": "Velocidade"
+    }
+  },
+  "note": {
+    "label": "Notas",
+    "placeholder": "Adicionar notas de treinador..."
+  },
+  "progress": {
+    "caughtCount": "Capturados: {{caught}} / {{total}}"
+  },
+  "offline": {
+    "offlineMode": "Modo offline — a mostrar dados em cache",
+    "readyOffline": "Aplicação pronta para funcionar offline",
+    "dismiss": "Dispensar",
+    "newVersion": "Nova versão disponível",
+    "reload": "Recarregar"
+  }
+}

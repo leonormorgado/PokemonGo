@@ -1,0 +1,123 @@
+{
+  "common": {
+    "close": "Close"
+  },
+  "app": {
+    "title": "Pokémon Master Pokédex"
+  },
+  "topBar": {
+    "primaryNav": "Primary navigation",
+    "allPokemon": "All Pokémon",
+    "myDeck": "My Deck",
+    "switchLanguage": "{{language}}"
+  },
+  "dashboard": {
+    "searchPlaceholder": "Search Pokémon...",
+    "caughtOnly": "Caught only",
+    "exportCsv": "Export CSV",
+    "share": "Share",
+    "shareStatus": {
+      "shared": "Shared!",
+      "copied": "Copied to clipboard",
+      "downloaded": "Downloaded (sharing unavailable)"
+    },
+    "viewGrid": "Grid",
+    "viewTable": "Table",
+    "loading": "Loading Pokédex...",
+    "selectedCount": "{{count}} selected",
+    "releaseSelected": "Release selected",
+    "clearSelection": "Clear",
+    "selectMultiple": "Bulk Release",
+    "exitSelectMode": "Done",
+    "sortBy": "Sort by",
+    "sortOptions": {
+      "nameAsc": "Name (A-Z)",
+      "nameDesc": "Name (Z-A)",
+      "caughtAtDesc": "Recently Caught",
+      "caughtAtAsc": "Oldest Caught",
+      "heightAsc": "Height (Low-High)",
+      "heightDesc": "Height (High-Low)"
+    },
+    "typeFilter": "Types",
+    "clearTypeFilter": "Clear"
+  },
+  "card": {
+    "caught": "Caught",
+    "catch": "Catch",
+    "release": "Release",
+    "viewDetails": "View details for {{name}}",
+    "selectAria": "Select {{name}} for release",
+    "share": "Share",
+    "shareAria": "Share {{name}}",
+    "shareStatus": {
+      "shared": "Shared!",
+      "copied": "Link copied!"
+    },
+    "notAddedToPokedex": "Not yet added to Pokédex",
+    "shuffleColorScheme": "Shuffle Color Scheme",
+    "statAbbr": {
+      "hp": "HP",
+      "attack": "ATK",
+      "defense": "DEF",
+      "specialAttack": "SP.ATK",
+      "specialDefense": "SP.DEF",
+      "speed": "SPD"
+    }
+  },
+  "table": {
+    "selectAllAria": "Select all caught Pokémon",
+    "caught": "Caught",
+    "catch": "Catch",
+    "release": "Release",
+    "columns": {
+      "select": "",
+      "status": "Status",
+      "name": "Name",
+      "types": "Types",
+      "caughtAt": "Caught",
+      "hp": "HP",
+      "attack": "Attack",
+      "defense": "Defense",
+      "speed": "Speed",
+      "height": "Height",
+      "weight": "Weight"
+    },
+    "loadingCell": "…",
+    "emptyCell": "—"
+  },
+  "detail": {
+    "loading": "Loading details...",
+    "heightWeight": "Height: {{height}} · Weight: {{weight}}",
+    "caughtOn": "Caught: {{date}}",
+    "notCaught": "Not caught yet",
+    "baseStats": "Base Stats",
+    "notes": "Notes",
+    "share": "Share",
+    "shareStatus": {
+      "shared": "Shared!",
+      "copied": "Link copied!"
+    },
+    "stats": {
+      "hp": "HP",
+      "attack": "Attack",
+      "defense": "Defense",
+      "specialAttack": "Sp. Attack",
+      "specialDefense": "Sp. Defense",
+      "speed": "Speed"
+    }
+  },
+  "note": {
+    "label": "Notes",
+    "placeholder": "Add trainer notes..."
+  },
+  "progress": {
+    "caughtCount": "Caught: {{caught}} / {{total}}"
+  },
+  "offline": {
+    "offlineMode": "Offline mode — showing cached data",
+    "readyOffline": "App ready to work offline",
+    "dismiss": "Dismiss",
+    "newVersion": "New version available",
+    "reload": "Reload"
+  }
+}
