@@ -373,7 +373,7 @@ export function PokedexDashboard({
         caughtOnly={caughtOnly}
         onCaughtOnlyChange={setCaughtOnly}
         forceCaughtOnly={forceCaughtOnly}
-        catalog={catalog}
+        catalog={forceCaughtOnly ? catalog.filter((entry) => entry.caught) : catalog}
         onShareDeck={forceCaughtOnly && !readOnly ? () => setShowShareDeck(true) : undefined}
         readOnly={readOnly}
         selectMode={selectMode}
