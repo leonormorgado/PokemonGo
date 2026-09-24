@@ -37,23 +37,11 @@ export async function sharePokemonCard(entry: {
   return { method: 'clipboard' };
 }
 
-/**
- * Builds a shareable read-only deck link encoding the trainer's caught Pokémon IDs as a
- * comma-separated query parameter (e.g. /deck?ids=1,3,6). Kept as a plain query string
- * (rather than base64/bitmask) since even a full 1000-entry deck stays well under typical
- * URL length limits and a plain list is trivially debuggable/human-readable.
- */
-export function getDeckShareUrl(caughtIds: number[]): string {
-  return `${window.location.origin}/deck?ids=${caughtIds.join(',')}`;
-}
-
-/** Shares a read-only link to the trainer's full caught deck, falling back to clipboard copy. */
-export async function shareDeck(caughtIds: number[]): Promise<PokemonShareResult> {
-  const url = getDeckShareUrl(caughtIds);
-
+/** Shares a server-created deck link, falling back to clipboard copy. */
+export async function shareDeck(url: string, title: string): Promise<PokemonShareResult> {
   if (typeof navigator !== 'undefined' && navigator.share) {
     try {
-      await navigator.share({ title: 'My Pokédex Deck', text: 'Check out my caught Pokémon!', url });
+      await navigator.share({ title, url });
       return { method: 'share' };
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {

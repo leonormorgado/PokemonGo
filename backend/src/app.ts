@@ -3,6 +3,8 @@ import express, { type Express } from 'express';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
 import type { PokemonService } from './application/services/pokemon.service.js';
+import { DeckShareService } from './application/services/deck-share.service.js';
+import { createDeckShareRouter } from './interfaces/http/routes/deck-share.routes.js';
 import { errorHandler } from './interfaces/http/middlewares/error-handler.middleware.js';
 import { createPokemonRouter } from './interfaces/http/routes/pokemon.routes.js';
 import { logger } from './shared/logger.js';
@@ -20,6 +22,7 @@ export function createApp(pokemonService: PokemonService, corsOrigin: string): E
   });
 
   app.use('/api/pokemon', createPokemonRouter(pokemonService));
+  app.use('/api/decks', createDeckShareRouter(new DeckShareService(pokemonService)));
 
   app.use(errorHandler);
 

@@ -11,6 +11,24 @@
     "myDeck": "O Meu Deck",
     "switchLanguage": "{{language}}"
   },
+  "deckShare": {
+    "heading": "Partilhar o teu baralho",
+    "titleLabel": "Título do baralho",
+    "titlePlaceholder": "O baralho da Leonor",
+    "count": "{{count}} Pokémon capturados",
+    "create": "Criar ligação",
+    "creating": "A criar...",
+    "createError": "Não foi possível criar a ligação. Tenta novamente.",
+    "ready": "A ligação está pronta. Qualquer pessoa com ela pode ver este baralho enquanto o servidor estiver ativo.",
+    "linkLabel": "Ligação do baralho",
+    "copy": "Copiar ligação",
+    "share": "Partilhar ligação",
+    "copied": "Ligação copiada",
+    "shared": "Partilhado!",
+    "copyError": "Não foi possível copiar. Seleciona a ligação acima para a copiar.",
+    "loading": "A carregar o baralho partilhado...",
+    "loadError": "Este baralho não foi encontrado. Pode ter expirado após reiniciar o servidor."
+  },
   "dashboard": {
     "searchPlaceholder": "Pesquisar Pokémon...",
     "caughtOnly": "Apenas capturados",

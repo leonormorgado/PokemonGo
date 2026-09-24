@@ -6,6 +6,7 @@ import { createIndexedDbPersister } from '../shared/lib/indexed-db-persister.js'
 import { TopBar } from '../shared/components/TopBar.js';
 import { PokedexDashboard } from '../features/pokedex/components/PokedexDashboard.js';
 import { MyDeckPage } from '../features/pokedex/components/MyDeckPage.js';
+import { SharedDeckPage } from '../features/pokedex/components/SharedDeckPage.js';
 
 export function App() {
   const persister = useMemo(() => createIndexedDbPersister(), []);
@@ -23,6 +24,7 @@ export function App() {
               <Route path="/" element={<PokedexDashboard />} />
               <Route path="/pokemon/:id" element={<PokedexDashboard />} />
               <Route path="/deck" element={<MyDeckPage />} />
+              <Route path="/deck/:key" element={<SharedDeckPage />} />
             </Routes>
           </main>
         </div>

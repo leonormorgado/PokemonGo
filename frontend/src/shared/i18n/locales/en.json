@@ -11,6 +11,24 @@
     "myDeck": "My Deck",
     "switchLanguage": "{{language}}"
   },
+  "deckShare": {
+    "heading": "Share your deck",
+    "titleLabel": "Deck title",
+    "titlePlaceholder": "Leonor's deck",
+    "count": "{{count}} Pokémon caught",
+    "create": "Create link",
+    "creating": "Creating...",
+    "createError": "Could not create the link. Try again.",
+    "ready": "Your link is ready. Anyone with it can view this deck while the server is running.",
+    "linkLabel": "Deck link",
+    "copy": "Copy link",
+    "share": "Share link",
+    "copied": "Link copied",
+    "shared": "Shared!",
+    "copyError": "Could not copy the link. Select it above to copy it.",
+    "loading": "Loading shared deck...",
+    "loadError": "This shared deck could not be found. It may have expired after a server restart."
+  },
   "dashboard": {
     "searchPlaceholder": "Search Pokémon...",
     "caughtOnly": "Caught only",

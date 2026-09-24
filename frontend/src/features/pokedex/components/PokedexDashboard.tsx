@@ -17,7 +17,7 @@ import { EmptyDeckState } from './EmptyDeckState.js';
 import { useTranslations } from '../../../shared/hooks/useTranslations.js';
 import { Trash2, X } from 'lucide-react';
 import type { CatalogEntry } from '../domain/pokemon.types.js';
-import { shareDeck } from '../strategies/export/share.js';
+import { ShareDeckModal } from './ShareDeckModal.js';
 import { PokedexToolbar } from './PokedexToolbar.js';
 import { typeColors } from '../../../shared/styles/colors.js';
 
@@ -29,7 +29,6 @@ type PokedexDashboardProps = {
   // Read-only view of another trainer's shared deck (populated from ?ids= on /deck).
   sharedDeckIds?: number[] | null;
 };
-
 
 export function PokedexDashboard({
   forceCaughtOnly = false,
@@ -47,7 +46,7 @@ export function PokedexDashboard({
   const [selectedEntry, setSelectedEntry] = useState<CatalogEntry | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [selectMode, setSelectMode] = useState(false);
-  const [deckShareStatus, setDeckShareStatus] = useState<string | null>(null);
+  const [showShareDeck, setShowShareDeck] = useState(false);
   const debouncedSearch = useDebounce(search);
   const [tablePage, setTablePage] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(PAGE_SIZE);
@@ -83,7 +82,13 @@ export function PokedexDashboard({
   const totalPokemonCount = useTotalPokemonCount(
     serverSearch || serverType ? undefined : listData?.pages.at(-1)?.total,
   );
-  const { caughtRecords, catch: catchPokemon, release, releaseMany, updateNote } = usePokedexStorage();
+  const {
+    caughtRecords,
+    catch: catchPokemon,
+    release,
+    releaseMany,
+    updateNote,
+  } = usePokedexStorage();
   // Tracked outside React state so the sort-driven fetch loop below always reads the latest
   // value instead of a stale one captured when the effect was created.
   const hasNextPageRef = useRef(hasNextPage);
@@ -156,7 +161,15 @@ export function PokedexDashboard({
     return () => {
       cancelled = true;
     };
-  }, [debouncedSearch, caughtOnly, selectedTypes, sort, useServerTypeFilter, setFilters, fetchNextPage]);
+  }, [
+    debouncedSearch,
+    caughtOnly,
+    selectedTypes,
+    sort,
+    useServerTypeFilter,
+    setFilters,
+    fetchNextPage,
+  ]);
 
   useEffect(() => {
     setSelectedEntry((current) =>
@@ -228,19 +241,6 @@ export function PokedexDashboard({
     ? () => {}
     : (entry: CatalogEntry) => void (entry.caught ? release(entry.id) : catchPokemon(entry.id));
 
-  const handleShareDeck = async () => {
-    const caughtIds = catalog.filter((entry) => entry.caught).map((entry) => entry.id);
-    const { method } = await shareDeck(caughtIds);
-    setDeckShareStatus(method === 'share' ? t('shareStatus.shared') : t('shareStatus.copied'));
-  };
-
-  useEffect(() => {
-    if (!deckShareStatus) return;
-    const timeout = setTimeout(() => setDeckShareStatus(null), 3000);
-    return () => clearTimeout(timeout);
-  }, [deckShareStatus]);
-
-
   // Caught-scoped pagination (My Deck, or the "Caught only" checkbox elsewhere): the real total
   // is the caught count matching the active search/type filters, not the dex/filtered-dex size,
   // and there's nothing left to load once every matching caught Pokémon has been found.
@@ -254,8 +254,11 @@ export function PokedexDashboard({
   // applies just as much outside "caught only" (e.g. paging through a fully-loaded sorted list)
   // as it does within it.
   const gridNeedsFetch =
-    hasNextPage && (caughtOnly ? loadedCaughtCount < caughtFetchTarget : visibleCatalog.length < gridVisibleCount);
-  const caughtHasMore = hasNextPage ? gridVisibleCount < caughtRecords.length : gridVisibleCount < loadedCaughtCount;
+    hasNextPage &&
+    (caughtOnly ? loadedCaughtCount < caughtFetchTarget : visibleCatalog.length < gridVisibleCount);
+  const caughtHasMore = hasNextPage
+    ? gridVisibleCount < caughtRecords.length
+    : gridVisibleCount < loadedCaughtCount;
 
   useEffect(() => {
     if (gridNeedsFetch && !isFetchingNextPage) {
@@ -276,14 +279,19 @@ export function PokedexDashboard({
     : selectedTypes.length > 1
       ? visibleCatalog.length
       : serverFilteredTotal;
-  const nonCaughtHasMore = hasNextPage ? gridVisibleCount < totalCount : gridVisibleCount < visibleCatalog.length;
+  const nonCaughtHasMore = hasNextPage
+    ? gridVisibleCount < totalCount
+    : gridVisibleCount < visibleCatalog.length;
   const gridHasMore = totalCount === 0 ? false : caughtOnly ? caughtHasMore : nonCaughtHasMore;
   const tablePageCount = caughtOnly
     ? Math.max(1, Math.ceil(totalCount / tablePageSize))
     : selectedTypes.length > 1
       ? Math.max(1, Math.ceil(visibleCatalog.length / tablePageSize) + (hasNextPage ? 1 : 0))
       : Math.max(1, Math.ceil(totalCount / tablePageSize));
-  const tableEntries = visibleCatalog.slice(tablePage * tablePageSize, (tablePage + 1) * tablePageSize);
+  const tableEntries = visibleCatalog.slice(
+    tablePage * tablePageSize,
+    (tablePage + 1) * tablePageSize,
+  );
   const showEmptyDeck = isDeckView && !isLoading && caughtRecords.length === 0;
   // Distinct from `showEmptyDeck`: this is a search/filter yielding zero matches, not an empty deck.
   const showNoResults = !isLoading && !showEmptyDeck && totalCount === 0 && !gridHasMore;
@@ -344,12 +352,10 @@ export function PokedexDashboard({
         <OfflineStatusBanner />
         {readOnly && (
           <div className="rounded-lg border-4 border-[#241F1A] bg-[#E8AEEC]/30 p-4 text-center text-xs font-black uppercase tracking-wider shadow-[4px_4px_0px_0px_#241F1A]">
-            {t('sharedDeckBanner', { count: sharedIdSet.size, total: listData?.pages.at(-1)?.total ?? 0 })}
-          </div>
-        )}
-        {deckShareStatus && (
-          <div className="rounded border-2 border-dashed border-[#241F1A] bg-[#C98A4D]/20 px-3 py-2 text-center text-xs font-bold">
-            {deckShareStatus}
+            {t('sharedDeckBanner', {
+              count: sharedIdSet.size,
+              total: listData?.pages.at(-1)?.total ?? 0,
+            })}
           </div>
         )}
         {forceCaughtOnly && (
@@ -368,7 +374,7 @@ export function PokedexDashboard({
         onCaughtOnlyChange={setCaughtOnly}
         forceCaughtOnly={forceCaughtOnly}
         catalog={catalog}
-        onShareDeck={forceCaughtOnly && !readOnly ? () => void handleShareDeck() : undefined}
+        onShareDeck={forceCaughtOnly && !readOnly ? () => setShowShareDeck(true) : undefined}
         readOnly={readOnly}
         selectMode={selectMode}
         onToggleSelectMode={toggleSelectMode}
@@ -389,7 +395,10 @@ export function PokedexDashboard({
       ) : showEmptyDeck ? (
         <EmptyDeckState />
       ) : showNoResults ? (
-        <EmptyDeckState title={tEmptyDeck('noResultsTitle')} subtitle={tEmptyDeck('noResultsSubtitle')} />
+        <EmptyDeckState
+          title={tEmptyDeck('noResultsTitle')}
+          subtitle={tEmptyDeck('noResultsSubtitle')}
+        />
       ) : (
         <div className="relative">
           {isSortLoading && <RetroLoader label={t('sorting')} testId="pokedex-sort-loader" />}
@@ -421,16 +430,25 @@ export function PokedexDashboard({
               hasMore={gridHasMore}
               isLoadingMore={gridNeedsFetch || isFetchingNextPage}
               onLoadMore={() => setGridVisibleCount((count) => count + PAGE_SIZE)}
-              loadedCount={Math.min(gridVisibleCount, caughtOnly ? loadedCaughtCount : visibleCatalog.length)}
+              loadedCount={Math.min(
+                gridVisibleCount,
+                caughtOnly ? loadedCaughtCount : visibleCatalog.length,
+              )}
               totalCount={totalCount}
             />
           )}
         </div>
       )}
 
-
-
       {/* Detail Modal */}
+      {showShareDeck && (
+        <ShareDeckModal
+          pokemonIds={caughtRecords
+            .filter((record) => record.caught)
+            .map((record) => record.pokemonId)}
+          onClose={() => setShowShareDeck(false)}
+        />
+      )}
       {selectedEntry && (
         <PokemonDetailModal
           entry={selectedEntry}
@@ -450,11 +468,11 @@ export function PokedexDashboard({
           <span className="whitespace-nowrap text-xs font-black uppercase tracking-wider">
             {t('selectedCount', { count: selectedIds.size })}
           </span>
-          <div className="flex w-full items-center gap-3 sm:w-auto sm:contents">
+          <div className="flex w-full items-center gap-3 sm:contents sm:w-auto">
             <button
               type="button"
               onClick={() => void handleReleaseSelected()}
-              className="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded border-2 border-[#241F1A] bg-[#DE623C] px-3 py-2 text-xs font-black uppercase tracking-wider text-white shadow-[2px_2px_0px_0px_rgba(36,31,26,1)] hover:opacity-90 active:translate-x-0.5 active:translate-y-0.5 transition-all sm:flex-none"
+              className="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded border-2 border-[#241F1A] bg-[#DE623C] px-3 py-2 text-xs font-black uppercase tracking-wider text-white shadow-[2px_2px_0px_0px_rgba(36,31,26,1)] transition-all hover:opacity-90 active:translate-x-0.5 active:translate-y-0.5 sm:flex-none"
             >
               <Trash2 className="h-3.5 w-3.5" />
               {t('releaseSelected')}
@@ -462,7 +480,7 @@ export function PokedexDashboard({
             <button
               type="button"
               onClick={() => setSelectedIds(new Set())}
-              className="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded border-2 border-[#241F1A] bg-white px-3 py-2 text-xs font-black uppercase tracking-wider text-[#241F1A] shadow-[2px_2px_0px_0px_rgba(36,31,26,1)] hover:bg-gray-50 active:translate-x-0.5 active:translate-y-0.5 transition-all sm:flex-none"
+              className="flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded border-2 border-[#241F1A] bg-white px-3 py-2 text-xs font-black uppercase tracking-wider text-[#241F1A] shadow-[2px_2px_0px_0px_rgba(36,31,26,1)] transition-all hover:bg-gray-50 active:translate-x-0.5 active:translate-y-0.5 sm:flex-none"
             >
               <X className="h-3.5 w-3.5" />
               {t('clearSelection')}
