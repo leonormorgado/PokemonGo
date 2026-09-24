@@ -25,6 +25,15 @@ export default defineConfig({
       workbox: {
         runtimeCaching: [
           {
+            urlPattern: ({ url }) => url.pathname.startsWith('/api/pokemon'),
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'pokedex-api-cache',
+              networkTimeoutSeconds: 3,
+              expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 7 },
+            },
+          },
+          {
             urlPattern: ({ url }) => url.origin === 'https://pokeapi.co',
             handler: 'StaleWhileRevalidate',
             options: {

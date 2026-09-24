@@ -26,6 +26,8 @@ export interface PokemonDetail {
 // Locally-owned trainer data, persisted independently of the PokéAPI data.
 export interface CaughtRecord {
   pokemonId: number;
+  name?: string;
+  sprite?: string | null;
   caught: boolean;
   caughtAt: string | null; // ISO timestamp
   notes: string;

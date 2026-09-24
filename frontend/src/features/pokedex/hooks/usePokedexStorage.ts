@@ -23,8 +23,8 @@ export function usePokedexStorage() {
   return {
     caughtRecords,
     isLoading,
-    catch: (pokemonId: number, notes?: string, tags?: string[]) =>
-      catchMutation.mutateAsync({ pokemonId, notes, tags }),
+    catch: (pokemonId: number, notes?: string, tags?: string[], name?: string, sprite?: string | null) =>
+      catchMutation.mutateAsync({ pokemonId, notes, tags, name, sprite }),
     release: (pokemonId: number) => releaseMutation.mutateAsync(pokemonId),
     releaseMany: (pokemonIds: number[]) => releaseManyMutation.mutateAsync(pokemonIds),
     updateNote: (pokemonId: number, notes: string) => updateNoteMutation.mutateAsync({ pokemonId, notes }),

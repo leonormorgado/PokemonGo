@@ -167,6 +167,8 @@ Vitest + React Testing Library. `setup.ts` imports `@testing-library/jest-dom/vi
 
 **ADR-009: Full-Screen Catch-Up Loader for My Deck's Dex-Ordered Pagination**
 
+*Superseded for My Deck by ADR-016: local catch snapshots now provide its entries without scanning the API roster.*
+
 - **Context**: My Deck (`forceCaughtOnly`) reuses the same dex-number-ordered, 42-per-page backend pagination as the general grid (see ADR-006). A Pokémon caught near the end of the dex (e.g. #900) only shows up once every earlier page has been background-fetched via `gridNeedsFetch`. Until then the grid rendered nothing but the "Load More" footer button — no visible loading indicator — making a legitimately caught Pokémon look missing from the deck entirely rather than merely still loading.
 - **Decision**: `PokedexDashboard` computes `isDeckCatchingUp` (My Deck view, no entries loaded yet, and a background page fetch is pending) and renders the existing `RetroLoader` full-area overlay (already used for `isSortLoading`, see ADR-007) over the grid/table while it's true, with a new `dashboard.loadingDeck` translation string. `showNoResults` is also gated off during this state so it isn't misread as a zero-match empty state. The table's own page-jump loader (`isJumpingPage`, driving `PokemonTable`'s `isLoadingNext`) had the same gap for rows-per-page changes: switching page size (e.g. 42 → 20) recomputed `tableEntries` immediately from whatever was already loaded, so a page size larger than the loaded/filtered count briefly rendered a truncated table before the background fetch caught up. The fetch-and-wait logic from `handleGoToTablePage` was extracted into a shared `ensureTableEntriesLoaded(targetPage, pageSize)`, used by both page navigation and `handleTablePageSizeChange`, so a page-size change now also triggers the jump loader whenever it needs more rows than are currently loaded.
 - **Consequences**: My Deck now shows an explicit loading state instead of an empty-looking grid while it pages through the dex to locate caught Pokémon, and changing the table's rows-per-page no longer flashes a short/truncated page while more rows are fetched in the background. The underlying fetch cost/order is unchanged (still sequential page-by-page from offset 0); a future backend endpoint to fetch by specific IDs would remove the need to catch up at all.
@@ -208,3 +210,15 @@ Vitest + React Testing Library. `setup.ts` imports `@testing-library/jest-dom/vi
 - Per-type breakdown totals ("BUG - 0/6") use `GET /api/pokemon/types/:type/count` (backend proxies PokéAPI's `/type/:name`) via a frontend `useTypeTotals(types)` hook, falling back to the loaded-entries count if the real total hasn't resolved yet.
 - The type filter's checkbox list (`PokedexToolbar`) is sourced from the static `typeColors` map (`shared/styles/colors.ts`), covering all 18 canonical types up front — not derived from `catalog`/loaded entries, which would only surface types seen in pages fetched so far (e.g. Dragon/Rock missing until enough pages loaded).
 - Selecting more than one type at once still falls back to client-side filtering over the unfiltered dex (see ADR-006) — no backend support for intersecting multiple `/type` rosters yet.
+
+**ADR-016: Offline Catch Snapshots and Visible Catch Dates**
+
+- **Context**: A caught Pokémon near the end of the roster could disappear from My Deck offline because the query cache keeps only the first list page. The table also hid catch dates in a hover tooltip.
+- **Decision**: Store the Pokémon name and sprite URL with each local catch record, and merge those records into My Deck independently of API pagination. Preserve that metadata when notes or tags change. Cache successful Pokémon API responses in the service worker for previously viewed details. Show catch dates directly in table cells.
+- **Consequences**: My Deck can list caught Pokémon after reload when the API is unavailable. Records saved before this change may show their numeric ID until their detail becomes available. Details never viewed before going offline still require a connection.
+
+**ADR-017: PWA Icons**
+
+- **Context**: The PWA manifest referenced icon files that were missing.
+- **Decision**: Add 192px and 512px Pokéball icons and a matching SVG favicon.
+- **Consequences**: The manifest now points to real assets without adding a package dependency.

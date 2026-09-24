@@ -21,7 +21,13 @@ export function usePokemonTypes(entries: CatalogEntry[]): CatalogEntry[] {
     () =>
       entries.map((entry, index) => {
         const detail = detailQueries[index]?.data as PokemonDetail | undefined;
-        return detail ? { ...entry, types: detail.types, height: detail.height } : entry;
+        return detail ? {
+          ...entry,
+          name: entry.name === String(entry.id) ? detail.name : entry.name,
+          sprite: entry.sprite ?? detail.sprite,
+          types: detail.types,
+          height: detail.height,
+        } : entry;
       }),
     [entries, detailQueries],
   );

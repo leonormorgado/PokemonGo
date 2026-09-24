@@ -23,19 +23,26 @@ export function useCatchPokemon() {
   return useMutation({
     mutationFn: async ({
       pokemonId,
+      name,
+      sprite,
       notes = '',
       tags = [],
     }: {
       pokemonId: number;
+      name?: string;
+      sprite?: string | null;
       notes?: string;
       tags?: string[];
     }) => {
+      const existing = await caughtRecordsStore.get(pokemonId);
       const record: CaughtRecord = {
         pokemonId,
+        name: name ?? existing?.name,
+        sprite: sprite ?? existing?.sprite,
         caught: true,
         caughtAt: new Date().toISOString(),
-        notes,
-        tags,
+        notes: notes || existing?.notes || '',
+        tags: tags.length ? tags : existing?.tags ?? [],
       };
       await caughtRecordsStore.put(record);
       return record;
@@ -87,6 +94,8 @@ export function useUpdateNote() {
       const existing = await caughtRecordsStore.get(pokemonId);
       const record: CaughtRecord = {
         pokemonId,
+        name: existing?.name,
+        sprite: existing?.sprite,
         caught: existing?.caught ?? false,
         caughtAt: existing?.caughtAt ?? null,
         notes,
@@ -110,6 +119,8 @@ export function useUpdateTags() {
       const existing = await caughtRecordsStore.get(pokemonId);
       const record: CaughtRecord = {
         pokemonId,
+        name: existing?.name,
+        sprite: existing?.sprite,
         caught: existing?.caught ?? false,
         caughtAt: existing?.caughtAt ?? null,
         notes: existing?.notes ?? '',

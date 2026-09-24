@@ -279,8 +279,8 @@ function PokemonTableComponent({
                 </td>
 
                 {/* Caught Status */}
-                <td className="px-3 py-2 text-center" title={formatCaughtAt(row.caughtAt) ?? undefined}>
-                  {row.caughtAt ? <span className="text-[#2E7D32]">✓</span> : t('emptyCell')}
+                <td className="px-3 py-2 text-center">
+                  {formatCaughtAt(row.caughtAt) ?? t('emptyCell')}
                 </td>
 
                 {/* Base Stat Total (hp + attack + defense + speed only; see usePokemonTableData) */}
