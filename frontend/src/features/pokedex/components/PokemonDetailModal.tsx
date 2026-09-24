@@ -37,7 +37,7 @@ export function PokemonDetailModal({ entry, onClose, onSaveNote, onToggleCaught 
         titleId="pokemon-detail-title"
         title={entry.name}
         onClose={onClose}
-        contentClassName="max-h-[92vh] w-full max-w-sm overflow-auto bg-transparent p-0 shadow-none border-none"
+        contentClassName="hide-scrollbar max-h-[92vh] w-full max-w-sm overflow-x-hidden overflow-y-auto border-none bg-transparent pb-2 pr-2 shadow-none"
         headerClassName="sr-only"
         titleClassName="sr-only"
         closeLabel={tCommon('close')}
