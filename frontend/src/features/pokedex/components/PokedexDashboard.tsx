@@ -7,7 +7,6 @@ import { useFilterSort } from '../hooks/useFilterSort.js';
 import { applyFilters } from '../strategies/filter/filter-strategy.js';
 import { usePokemonTypes } from '../hooks/usePokemonTypes.js';
 import { OfflineStatusBanner } from '../../offline/components/OfflineStatusBanner.js';
-import { useDebounce } from '../../../shared/hooks/useDebounce.js';
 import { RetroLoader } from '../../../shared/components/RetroLoader.js';
 import { ProgressOverview } from './ProgressOverview.js';
 import { PokemonGrid } from './PokemonGrid.js';
@@ -47,7 +46,9 @@ export function PokedexDashboard({
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [selectMode, setSelectMode] = useState(false);
   const [showShareDeck, setShowShareDeck] = useState(false);
-  const debouncedSearch = useDebounce(search);
+  // Already debounced: `PokedexToolbar` keeps raw keystrokes local and only pushes this value up
+  // once typing settles, so no further debouncing is needed here.
+  const debouncedSearch = search;
   const [tablePage, setTablePage] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(PAGE_SIZE);
   const [isJumpingPage, setIsJumpingPage] = useState(false);
@@ -76,6 +77,8 @@ export function PokedexDashboard({
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isError,
+    error,
   } = usePokemonList(PAGE_SIZE, serverType, serverSearch);
   // Only the true, unfiltered dex size should be persisted as the overview's "total", never a
   // server-filtered subset (search/type), which would otherwise corrupt the cached total.
@@ -169,6 +172,7 @@ export function PokedexDashboard({
     useServerTypeFilter,
     setFilters,
     fetchNextPage,
+    serverSearch,
   ]);
 
   useEffect(() => {
@@ -239,17 +243,48 @@ export function PokedexDashboard({
 
   const handleToggleCaught = readOnly
     ? () => {}
-    : (entry: CatalogEntry) => void (entry.caught ? release(entry.id) : catchPokemon(entry.id));
+    : (entry: CatalogEntry) =>
+        // Guard against the deep-link placeholder (id 0 for an unresolved/invalid route param),
+        // which would otherwise inflate caught counts with a record for a nonexistent Pokémon.
+        entry.id > 0 ? void (entry.caught ? release(entry.id) : catchPokemon(entry.id)) : undefined;
+
+  // Excludes any stray record for an invalid id (e.g. from the deep-link placeholder above) and
+  // any record persisted with `caught: false` (e.g. a note/tag saved on an uncaught Pokémon),
+  // which would otherwise never appear in a loaded page and permanently overstate every count
+  // below.
+  const validCaughtRecords = useMemo(
+    () => caughtRecords.filter((record) => record.pokemonId > 0 && record.caught),
+    [caughtRecords],
+  );
+
+  // Independent of `catalog` (which is scoped to the active search/type filter), so the progress
+  // overview's type breakdown always reflects every caught Pokémon, not just the filtered subset.
+  const caughtEntriesForOverview: CatalogEntry[] = useMemo(
+    () =>
+      validCaughtRecords.map((record) => ({
+        id: record.pokemonId,
+        name: String(record.pokemonId),
+        sprite: null,
+        caught: true,
+        caughtAt: record.caughtAt,
+        notes: record.notes,
+        tags: record.tags,
+        types: [],
+        height: null,
+      })),
+    [validCaughtRecords],
+  );
+  const overviewEntries = usePokemonTypes(caughtEntriesForOverview);
 
   // Caught-scoped pagination (My Deck, or the "Caught only" checkbox elsewhere): the real total
   // is the caught count matching the active search/type filters, not the dex/filtered-dex size,
   // and there's nothing left to load once every matching caught Pokémon has been found.
   const loadedCaughtCount = catalog.filter((entry) => entry.caught).length;
   // Only fetch underlying pages up to the currently requested 42-sized "page", instead of pulling
-  // in every matching page until all caught Pokémon happen to be loaded. `caughtRecords.length`
+  // in every matching page until all caught Pokémon happen to be loaded. `validCaughtRecords.length`
   // is an upper bound (it ignores search/type), tightened down to the real count once
   // `hasNextPage` goes false (see `totalCount` below).
-  const caughtFetchTarget = Math.min(gridVisibleCount, caughtRecords.length);
+  const caughtFetchTarget = Math.min(gridVisibleCount, validCaughtRecords.length);
   // Whether the grid's next `gridVisibleCount` slice needs more backend pages loaded first —
   // applies just as much outside "caught only" (e.g. paging through a fully-loaded sorted list)
   // as it does within it.
@@ -257,24 +292,25 @@ export function PokedexDashboard({
     hasNextPage &&
     (caughtOnly ? loadedCaughtCount < caughtFetchTarget : visibleCatalog.length < gridVisibleCount);
   const caughtHasMore = hasNextPage
-    ? gridVisibleCount < caughtRecords.length
+    ? gridVisibleCount < validCaughtRecords.length
     : gridVisibleCount < loadedCaughtCount;
 
   useEffect(() => {
-    if (gridNeedsFetch && !isFetchingNextPage) {
+    // Without this guard, a failed fetch leaves `gridNeedsFetch` true forever, retrying endlessly.
+    if (gridNeedsFetch && !isFetchingNextPage && !isError) {
       void fetchNextPage();
     }
-  }, [gridNeedsFetch, isFetchingNextPage, fetchNextPage]);
+  }, [gridNeedsFetch, isFetchingNextPage, isError, fetchNextPage]);
 
   // Without active filters the API total gives the real page count. Search and/or a single type
   // filter are also fetched paginated from the backend, so that combined total is exact too. Once
   // "caught only" is layered on top, the exact total is only known after every matching page has
-  // been fetched (`!hasNextPage`); until then, `caughtRecords.length` is used as an upper-bound
+  // been fetched (`!hasNextPage`); until then, `validCaughtRecords.length` is used as an upper-bound
   // estimate. Multiple types selected fall back to the loaded-so-far estimate (no server support).
   const serverFilteredTotal = listData?.pages.at(-1)?.total ?? 0;
   const totalCount = caughtOnly
     ? hasNextPage
-      ? caughtRecords.length
+      ? validCaughtRecords.length
       : loadedCaughtCount
     : selectedTypes.length > 1
       ? visibleCatalog.length
@@ -292,21 +328,32 @@ export function PokedexDashboard({
     tablePage * tablePageSize,
     (tablePage + 1) * tablePageSize,
   );
-  const showEmptyDeck = isDeckView && !isLoading && caughtRecords.length === 0;
+  const showEmptyDeck = isDeckView && !isLoading && validCaughtRecords.length === 0;
+  // My Deck pages through the backend in dex-number order, so a Pokémon caught near the end of
+  // the dex (e.g. #900) only appears once every earlier page has been fetched. Without this, the
+  // grid renders empty (just the "load more" footer) while those background fetches are still
+  // running, making a caught Pokémon look missing from the deck instead of merely still loading.
+  const isDeckCatchingUp = isDeckView && visibleCatalog.length === 0 && gridNeedsFetch;
   // Distinct from `showEmptyDeck`: this is a search/filter yielding zero matches, not an empty deck.
-  const showNoResults = !isLoading && !showEmptyDeck && totalCount === 0 && !gridHasMore;
+  const showNoResults =
+    !isLoading && !showEmptyDeck && !isDeckCatchingUp && totalCount === 0 && !gridHasMore;
 
   const handleTablePageSizeChange = (pageSize: number) => {
+    void ensureTableEntriesLoaded(0, pageSize);
     setTablePageSize(pageSize);
     setTablePage(0);
   };
 
-  const handleGoToTablePage = async (target: number) => {
-    const safeTarget = Math.max(0, target);
+  // Shared by page-navigation and page-size changes: both can require more backend pages than are
+  // currently loaded, and both must show the jump loader meanwhile — otherwise the table renders
+  // fewer rows than the new page/page-size implies until the background fetch catches up, looking
+  // like an empty/truncated table rather than a still-loading one.
+  const ensureTableEntriesLoaded = async (targetPage: number, pageSize: number) => {
+    const safeTarget = Math.max(0, targetPage);
     const caughtById = new Map(caughtRecords.map((record) => [record.pokemonId, record]));
     let more = hasNextPage;
     let filteredCount = visibleCatalog.length;
-    const needsFetch = (safeTarget + 1) * tablePageSize > filteredCount && more;
+    const needsFetch = (safeTarget + 1) * pageSize > filteredCount && more;
     // Force the retro loader to stay visible for a minimum stretch so it's actually perceivable
     // even when the fetch itself resolves quickly.
     const minLoaderDuration = 2500;
@@ -314,7 +361,7 @@ export function PokedexDashboard({
     if (needsFetch) setIsJumpingPage(true);
     // Recompute the filtered count from freshly fetched pages (not the stale visibleCatalog
     // closure) so jumping across filtered/searched results still fetches enough items.
-    while ((safeTarget + 1) * tablePageSize > filteredCount && more) {
+    while ((safeTarget + 1) * pageSize > filteredCount && more) {
       const result = await fetchNextPage();
       const items = result.data?.pages.flatMap((page) => page.items) ?? [];
       const entries: CatalogEntry[] = items.map((item) => {
@@ -342,7 +389,11 @@ export function PokedexDashboard({
       if (remaining > 0) await new Promise((resolve) => setTimeout(resolve, remaining));
       setIsJumpingPage(false);
     }
-    setTablePage(safeTarget);
+  };
+
+  const handleGoToTablePage = async (target: number) => {
+    await ensureTableEntriesLoaded(target, tablePageSize);
+    setTablePage(Math.max(0, target));
   };
 
   return (
@@ -360,7 +411,11 @@ export function PokedexDashboard({
         )}
         {forceCaughtOnly && (
           <div className="rounded-lg border-4 border-[#241F1A] bg-[#F4EBE1] p-4 shadow-[4px_4px_0px_0px_#241F1A]">
-            <ProgressOverview entries={catalog} totalOverride={totalPokemonCount} />
+            <ProgressOverview
+              entries={overviewEntries}
+              totalOverride={totalPokemonCount}
+              caughtOverride={validCaughtRecords.length}
+            />
           </div>
         )}
       </div>
@@ -402,6 +457,9 @@ export function PokedexDashboard({
       ) : (
         <div className="relative">
           {isSortLoading && <RetroLoader label={t('sorting')} testId="pokedex-sort-loader" />}
+          {isDeckCatchingUp && (
+            <RetroLoader label={t('loadingDeck')} testId="pokedex-deck-catchup-loader" />
+          )}
           {viewMode === 'table' ? (
             <PokemonTable
               entries={tableEntries}
@@ -437,15 +495,26 @@ export function PokedexDashboard({
               totalCount={totalCount}
             />
           )}
+          {isError && (
+            <div className="mt-4 flex flex-col items-center gap-2 rounded-lg border-4 border-[#241F1A] bg-[#F4EBE1] p-4 text-center text-sm font-bold shadow-[4px_4px_0px_0px_#241F1A]">
+              <span>{t('loadMoreError')}</span>
+              {error instanceof Error && <span className="text-xs font-normal">{error.message}</span>}
+              <button
+                type="button"
+                onClick={() => void fetchNextPage()}
+                className="rounded-lg border-4 border-[#241F1A] bg-[#E8AEEC] px-4 py-2 text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_0px_#241F1A] transition hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none"
+              >
+                {t('retry')}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
       {/* Detail Modal */}
       {showShareDeck && (
         <ShareDeckModal
-          pokemonIds={caughtRecords
-            .filter((record) => record.caught)
-            .map((record) => record.pokemonId)}
+          pokemonIds={validCaughtRecords.map((record) => record.pokemonId)}
           onClose={() => setShowShareDeck(false)}
         />
       )}

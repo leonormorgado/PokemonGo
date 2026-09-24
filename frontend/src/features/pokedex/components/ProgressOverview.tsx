@@ -7,11 +7,13 @@ import { useTranslations } from '../../../shared/hooks/useTranslations.js';
 interface ProgressOverviewProps {
   entries: CatalogEntry[];
   totalOverride?: number;
+  // Real, Pokédex-wide caught count (not just what's been fetched into `entries`).
+  caughtOverride?: number;
 }
 
 const INK = '#241F1A';
 
-export function ProgressOverview({ entries, totalOverride }: ProgressOverviewProps) {
+export function ProgressOverview({ entries, totalOverride, caughtOverride }: ProgressOverviewProps) {
   const t = useTranslations('progress');
   const loadedTypes = useMemo(
     () => Array.from(new Set(entries.flatMap((entry) => entry.types))).sort(),
@@ -19,8 +21,8 @@ export function ProgressOverview({ entries, totalOverride }: ProgressOverviewPro
   );
   const typeTotals = useTypeTotals(loadedTypes);
   const { caughtCount, totalCount, percentCaught, typeDistribution } = useMemo(
-    () => computeProgressStats(entries, totalOverride, typeTotals),
-    [entries, totalOverride, typeTotals],
+    () => computeProgressStats(entries, totalOverride, typeTotals, caughtOverride),
+    [entries, totalOverride, typeTotals, caughtOverride],
   );
 
   return (

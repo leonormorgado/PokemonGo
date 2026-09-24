@@ -3,7 +3,7 @@ import { Modal } from '../../../shared/components/Modal.js';
 import { usePokemonDetail } from '../hooks/usePokemonDetail.js';
 import { RetroPokemonCard } from './RetroPokemonCard.js';
 import { useTranslations } from '../../../shared/hooks/useTranslations.js';
-import { sharePokemonCard } from '../strategies/export/share.js';
+import { ShareDeckModal } from './ShareDeckModal.js';
 import type { CatalogEntry } from '../domain/pokemon.types.js';
 
 interface PokemonDetailModalProps {
@@ -19,22 +19,11 @@ export function PokemonDetailModal({ entry, onClose, onSaveNote, onToggleCaught 
   const tCommon = useTranslations('common');
   const { data: detail, isLoading } = usePokemonDetail(entry.name);
   const [notes, setNotes] = useState(entry.notes);
-  const [shareStatus, setShareStatus] = useState<string | null>(null);
+  const [showShare, setShowShare] = useState(false);
 
   useEffect(() => {
     setNotes(entry.notes);
   }, [entry.notes]);
-
-  useEffect(() => {
-    if (!shareStatus) return;
-    const timeout = setTimeout(() => setShareStatus(null), 2000);
-    return () => clearTimeout(timeout);
-  }, [shareStatus]);
-
-  const handleShare = async () => {
-    const { method } = await sharePokemonCard(entry);
-    setShareStatus(method === 'share' ? t('shareStatus.shared') : t('shareStatus.copied'));
-  };
 
   const handleBlur = () => {
     if (notes !== entry.notes) {
@@ -90,12 +79,20 @@ export function PokemonDetailModal({ entry, onClose, onSaveNote, onToggleCaught 
               onNotesChange={setNotes}
               onNotesBlur={handleBlur}
               onToggleCaught={onToggleCaught ? () => onToggleCaught(entry) : undefined}
-              onShare={() => void handleShare()}
-              shareLabel={shareStatus ?? t('share')}
+              onShare={() => setShowShare(true)}
+              shareLabel={t('share')}
             />
           </div>
         )}
       </Modal>
+      {showShare && (
+        <ShareDeckModal
+          variant="pokemon"
+          pokemonId={entry.id}
+          pokemonName={entry.name}
+          onClose={() => setShowShare(false)}
+        />
+      )}
     </>
   );
 }

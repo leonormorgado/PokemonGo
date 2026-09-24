@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Search, Download, Share2, LayoutGrid, Table as TableIcon, CheckSquare } from 'lucide-react';
 import type { CatalogEntry, SortOption } from '../domain/pokemon.types.js';
 import { downloadExport, CSVExporterStrategy } from '../strategies/export/csv-exporter.strategy.js';
+import { useDebounce } from '../../../shared/hooks/useDebounce.js';
 import { TypeBadge } from './TypeBadge.js';
 
 type ViewMode = 'grid' | 'table';
@@ -70,6 +71,16 @@ export function PokedexToolbar({
     );
   };
 
+  // Kept local so every keystroke re-renders only the toolbar, not the whole dashboard/grid;
+  // the debounced value is pushed up to parent state once typing settles.
+  const [inputValue, setInputValue] = useState(search);
+  const debouncedInputValue = useDebounce(inputValue);
+
+  useEffect(() => {
+    if (debouncedInputValue !== search) onSearchChange(debouncedInputValue);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedInputValue]);
+
   const sortDetailsRef = useRef<HTMLDetailsElement>(null);
   const typeDetailsRef = useRef<HTMLDetailsElement>(null);
 
@@ -92,14 +103,15 @@ export function PokedexToolbar({
     <div className="mb-6 rounded-lg border-4 border-[#241F1A] bg-[#F4EBE1] p-4 shadow-[4px_4px_0px_0px_#241F1A]">
       {/* Row 1: Search & Mode Controls */}
       <div className="flex flex-wrap items-center gap-3">
-        {/* Search Input */}
-        <div className="relative flex-1 min-w-[220px]">
+        {/* Search Input: min-w-0 lets it shrink below the usual 220px floor on very narrow
+            screens instead of forcing the whole toolbar to overflow its card border. */}
+        <div className="relative min-w-0 flex-1 sm:min-w-[220px]">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-60" />
           <input
             type="search"
             placeholder={t('searchPlaceholder')}
-            value={search}
-            onChange={(event) => onSearchChange(event.target.value)}
+            value={inputValue}
+            onChange={(event) => setInputValue(event.target.value)}
             className={`w-full rounded border-2 border-[#241F1A] bg-white pl-9 pr-3 text-xs font-bold text-[#241F1A] shadow-[2px_2px_0px_0px_rgba(36,31,26,0.2)] focus:outline-none focus:ring-2 focus:ring-[#C98A4D] ${BUTTON_HEIGHT}`}
           />
         </div>
@@ -121,8 +133,10 @@ export function PokedexToolbar({
           </button>
         )}
 
-        {/* View Mode Toggles */}
-        <div className={`ml-auto flex shrink-0 items-center gap-1 rounded border-2 border-[#241F1A] bg-white p-1 shadow-[2px_2px_0px_0px_rgba(36,31,26,1)] ${BUTTON_HEIGHT}`}>
+        {/* View Mode Toggles: wrapper forces left alignment once this wraps to its own line on
+            very small screens (`ml-auto` alone isn't enough once it's the sole item on that line) */}
+        <div className="flex w-full justify-start sm:contents">
+          <div className={`ml-auto flex shrink-0 items-center gap-1 rounded border-2 border-[#241F1A] bg-white p-1 shadow-[2px_2px_0px_0px_rgba(36,31,26,1)] ${BUTTON_HEIGHT}`}>
           <button
             type="button"
             onClick={() => onViewModeChange('grid')}
@@ -149,6 +163,7 @@ export function PokedexToolbar({
             <TableIcon className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">{t('viewTable')}</span>
           </button>
+          </div>
         </div>
       </div>
 
@@ -236,9 +251,10 @@ export function PokedexToolbar({
           </label>
         )}
 
-        {/* Secondary Actions: Export */}
+        {/* Secondary Actions: Export. Same left-alignment wrapper as the view mode toggles above. */}
         {!readOnly && (
-          <div className={`ml-auto flex shrink-0 items-center gap-1 rounded border-2 border-[#241F1A] bg-white p-1 shadow-[2px_2px_0px_0px_rgba(36,31,26,1)] ${BUTTON_HEIGHT}`}>
+          <div className="flex w-full justify-start sm:contents">
+            <div className={`ml-auto flex shrink-0 items-center gap-1 rounded border-2 border-[#241F1A] bg-white p-1 shadow-[2px_2px_0px_0px_rgba(36,31,26,1)] ${BUTTON_HEIGHT}`}>
             <button
               type="button"
               onClick={() => downloadExport(new CSVExporterStrategy(), catalog, 'pokedex')}
@@ -259,6 +275,7 @@ export function PokedexToolbar({
                 <span className="hidden sm:inline">{t('shareDeck')}</span>
               </button>
             )}
+            </div>
           </div>
         )}
       </div>

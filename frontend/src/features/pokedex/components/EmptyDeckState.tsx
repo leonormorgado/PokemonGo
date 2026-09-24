@@ -30,6 +30,8 @@ export function EmptyDeckState({ title, subtitle }: { title?: string; subtitle?:
   return (
     <div
       data-testid="empty-deck-state"
+      role="status"
+      aria-live="polite"
       className="flex flex-col items-center justify-center gap-4 rounded-lg border-4 border-dashed border-[#241F1A] bg-[#F4EBE1] p-10 text-center shadow-[4px_4px_0px_0px_#241F1A]"
     >
       <div className="flex items-end gap-3">

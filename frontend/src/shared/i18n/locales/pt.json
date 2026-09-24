@@ -14,7 +14,7 @@
   "deckShare": {
     "heading": "Partilhar o teu baralho",
     "titleLabel": "Título do baralho",
-    "titlePlaceholder": "O baralho da Leonor",
+    "titlePlaceholder": "O baralho do João",
     "count": "{{count}} Pokémon capturados",
     "create": "Criar ligação",
     "creating": "A criar...",
@@ -27,7 +27,26 @@
     "shared": "Partilhado!",
     "copyError": "Não foi possível copiar. Seleciona a ligação acima para a copiar.",
     "loading": "A carregar o baralho partilhado...",
-    "loadError": "Este baralho não foi encontrado. Pode ter expirado após reiniciar o servidor."
+    "loadError": "Este baralho não foi encontrado. Pode ter expirado após reiniciar o servidor.",
+    "loadMore": "Carregar mais",
+    "loadMoreCount": "A mostrar {{count}} de {{total}}"
+  },
+  "pokemonShare": {
+    "heading": "Partilhar este Pokémon",
+    "ready": "Qualquer pessoa com esta ligação pode ver este cartão de Pokémon.",
+    "linkLabel": "Ligação do Pokémon",
+    "copy": "Copiar ligação",
+    "share": "Partilhar ligação",
+    "copied": "Ligação copiada",
+    "shared": "Partilhado!",
+    "copyError": "Não foi possível copiar. Seleciona a ligação acima para a copiar."
+  },
+  "sharedPokemon": {
+    "loading": "A carregar cartão de Pokémon...",
+    "notFound": "Este cartão de Pokémon não foi encontrado.",
+    "total": "Total",
+    "publicCardBadge": "Cartão Público da Pokédex",
+    "collectorsCard": "Cartão de Colecionador"
   },
   "dashboard": {
     "searchPlaceholder": "Pesquisar Pokémon...",
@@ -45,6 +64,9 @@
     "viewTable": "Tabela",
     "loading": "A carregar Pokédex...",
     "sorting": "A ordenar todos...",
+    "loadingDeck": "A procurar os teus Pokémon capturados...",
+    "loadMoreError": "Falha ao carregar mais Pokémon",
+    "retry": "Tentar novamente",
     "selectedCount": "{{count}} selecionados",
     "releaseSelected": "Libertar selecionados",
     "clearSelection": "Limpar",
@@ -124,6 +146,7 @@
     "caughtOn": "Capturado: {{date}}",
     "notCaught": "Ainda não capturado",
     "baseStats": "Estatísticas Base",
+    "total": "Total",
     "notes": "Notas",
     "share": "Partilhar",
     "shareStatus": {

@@ -14,7 +14,7 @@
   "deckShare": {
     "heading": "Share your deck",
     "titleLabel": "Deck title",
-    "titlePlaceholder": "Leonor's deck",
+    "titlePlaceholder": "John's deck",
     "count": "{{count}} Pokémon caught",
     "create": "Create link",
     "creating": "Creating...",
@@ -27,7 +27,26 @@
     "shared": "Shared!",
     "copyError": "Could not copy the link. Select it above to copy it.",
     "loading": "Loading shared deck...",
-    "loadError": "This shared deck could not be found. It may have expired after a server restart."
+    "loadError": "This shared deck could not be found. It may have expired after a server restart.",
+    "loadMore": "Load more",
+    "loadMoreCount": "Showing {{count}} of {{total}}"
+  },
+  "pokemonShare": {
+    "heading": "Share this Pokémon",
+    "ready": "Anyone with this link can view this Pokémon's card.",
+    "linkLabel": "Pokémon link",
+    "copy": "Copy link",
+    "share": "Share link",
+    "copied": "Link copied",
+    "shared": "Shared!",
+    "copyError": "Could not copy the link. Select it above to copy it."
+  },
+  "sharedPokemon": {
+    "loading": "Loading Pokémon card...",
+    "notFound": "This Pokémon card could not be found.",
+    "total": "Total",
+    "publicCardBadge": "Public Pokédex Card",
+    "collectorsCard": "Collector's Card"
   },
   "dashboard": {
     "searchPlaceholder": "Search Pokémon...",
@@ -45,6 +64,9 @@
     "viewTable": "Table",
     "loading": "Loading Pokédex...",
     "sorting": "Sorting them all...",
+    "loadingDeck": "Fetching your caught Pokémon...",
+    "loadMoreError": "Failed to load more Pokémon",
+    "retry": "Retry",
     "selectedCount": "{{count}} selected",
     "releaseSelected": "Release selected",
     "clearSelection": "Clear",
@@ -124,6 +146,7 @@
     "caughtOn": "Caught: {{date}}",
     "notCaught": "Not caught yet",
     "baseStats": "Base Stats",
+    "total": "Total",
     "notes": "Notes",
     "share": "Share",
     "shareStatus": {

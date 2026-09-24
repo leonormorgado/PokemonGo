@@ -20,14 +20,20 @@ export interface ProgressStats {
  * while only a subset of pages has loaded.
  * @param typeTotals Real per-type totals (from `useTypeTotals`), preferred over counting only
  * the loaded entries so "BUG - 0/6" reflects the whole Pokédex, not just what's on screen.
+ * @param caughtOverride Real, Pokédex-wide caught count (from all caught records), preferred over
+ * counting only the loaded entries so the header doesn't understate progress while pages are
+ * still being fetched.
  */
 export function computeProgressStats(
   entries: CatalogEntry[],
   totalOverride?: number,
   typeTotals?: Record<string, number>,
+  caughtOverride?: number,
 ): ProgressStats {
   const totalCount = totalOverride && totalOverride > entries.length ? totalOverride : entries.length;
-  const caughtCount = entries.filter((entry) => entry.caught).length;
+  const loadedCaughtCount = entries.filter((entry) => entry.caught).length;
+  const caughtCount =
+    caughtOverride !== undefined && caughtOverride > loadedCaughtCount ? caughtOverride : loadedCaughtCount;
   const percentCaught = totalCount === 0 ? 0 : Math.round((caughtCount / totalCount) * 100);
 
   const byType = new Map<string, { caught: number; total: number }>();

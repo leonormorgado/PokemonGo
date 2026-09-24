@@ -1,5 +1,9 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 interface ModalProps {
   titleId: string;
@@ -26,6 +30,8 @@ export function Modal({
   closeLabel = 'Close',
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -35,7 +41,36 @@ export function Modal({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  return (
+  useEffect(() => {
+    // Restore focus to whatever triggered the modal once it unmounts.
+    const triggerElement = document.activeElement as HTMLElement | null;
+    const content = contentRef.current;
+    const firstFocusable = content?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+    (firstFocusable ?? closeButtonRef.current)?.focus();
+
+    const handleTabTrap = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab' || !content) return;
+      const focusable = Array.from(content.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+      if (focusable.length === 0) return;
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', handleTabTrap);
+
+    return () => {
+      document.removeEventListener('keydown', handleTabTrap);
+      triggerElement?.focus();
+    };
+  }, []);
+
+  return createPortal(
     <div
       ref={overlayRef}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
@@ -44,6 +79,7 @@ export function Modal({
       }}
     >
       <div
+        ref={contentRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
@@ -57,6 +93,7 @@ export function Modal({
             {title}
           </h2>
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
             aria-label={closeLabel}
@@ -67,6 +104,9 @@ export function Modal({
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
+
+

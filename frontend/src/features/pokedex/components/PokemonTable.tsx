@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { RetroLoader } from '../../../shared/components/RetroLoader.js';
 import { RetroSelect } from '../../../shared/components/RetroSelect.js';
 import { useTranslations } from '../../../shared/hooks/useTranslations.js';
@@ -87,7 +87,7 @@ function compareValues(a: TableEntry, b: TableEntry, column: TableColumn): numbe
   return aValue - bValue;
 }
 
-export function PokemonTable({
+function PokemonTableComponent({
   entries,
   onSelect,
   onToggleCaught,
@@ -152,7 +152,7 @@ export function PokemonTable({
   return (
     /* overflow-hidden + rounded-xl ensures outer hard border corners remain curved */
     <div
-      className="relative hidden max-h-[72vh] flex-col overflow-hidden rounded-xl border-4 border-[#241F1A] bg-[#FFFACF] font-mono text-[#241F1A] shadow-[5px_5px_0px_0px_#241F1A] md:flex"
+      className="relative flex max-h-[72vh] flex-col overflow-hidden rounded-xl border-4 border-[#241F1A] bg-[#FFFACF] font-mono text-[#241F1A] shadow-[5px_5px_0px_0px_#241F1A]"
       data-testid="pokemon-table"
     >
       {pagination?.isLoadingNext && (
@@ -160,9 +160,10 @@ export function PokemonTable({
       )}
       <div
         ref={scrollContainerRef}
-        className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden [scrollbar-color:#241F1A_#FFFACF]"
+        className="min-h-0 flex-1 overflow-auto [scrollbar-color:#241F1A_#FFFACF]"
       >
-        <table className="w-full table-fixed border-collapse text-xs font-bold">
+        {/* min-w keeps columns readable on narrow screens; the container scrolls horizontally instead of crushing them */}
+        <table className="w-full min-w-[640px] table-fixed border-collapse text-xs font-bold">
           <thead className="sticky top-0 z-10 bg-[#241F1A] text-white">
             <tr>
               {selectMode && (
@@ -302,7 +303,35 @@ export function PokemonTable({
             />
           </div>
           {pagination.pageCount > 1 && (
-            <div className="flex items-center gap-2">
+            <>
+              {/* Mobile: compact "< PAGE X OF Y >" control — numbered pills and the </>>
+                  jump-to-first/last buttons force multi-row wrapping on narrow screens. */}
+              <div className="flex items-center gap-3 sm:hidden">
+                <button
+                  type="button"
+                  aria-label={t('prevPage')}
+                  onClick={() => pagination.onGoToPage(pagination.page - 1)}
+                  disabled={pagination.page === 0}
+                  className="rounded-md border-2 border-white px-2 py-1 text-[10px] font-black transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  &lt;
+                </button>
+                <span className="text-[10px] font-black uppercase tracking-wider">
+                  {t('pageIndicator', { page: pagination.page + 1, pageCount: pagination.pageCount })}
+                </span>
+                <button
+                  type="button"
+                  aria-label={t('nextPage')}
+                  onClick={() => pagination.onGoToPage(pagination.page + 1)}
+                  disabled={pagination.page >= pagination.pageCount - 1 || pagination.isLoadingNext}
+                  className="rounded-md border-2 border-white px-2 py-1 text-[10px] font-black transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  &gt;
+                </button>
+              </div>
+
+              {/* Desktop/tablet: full pagination with jump-to-first/last and numbered pills. */}
+              <div className="hidden flex-wrap items-center justify-center gap-2 sm:flex">
               {isEditingPage ? (
                 <span className="mr-1 flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-white/70">
                   <input
@@ -388,10 +417,14 @@ export function PokemonTable({
               >
                 &gt;&gt;
               </button>
-            </div>
+              </div>
+            </>
           )}
+
         </div>
       )}
     </div>
   );
 }
+
+export const PokemonTable = memo(PokemonTableComponent);

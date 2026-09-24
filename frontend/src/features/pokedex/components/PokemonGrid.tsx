@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { memo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import type { CatalogEntry } from '../domain/pokemon.types.js';
 import { PokemonCard } from './PokemonCard.js';
@@ -26,7 +26,7 @@ interface PokemonGridProps {
   totalCount?: number;
 }
 
-export function PokemonGrid({
+function PokemonGridComponent({
   entries,
   onToggleCaught,
   onSelect,
@@ -143,3 +143,5 @@ export function PokemonGrid({
     </div>
   );
 }
+
+export const PokemonGrid = memo(PokemonGridComponent);

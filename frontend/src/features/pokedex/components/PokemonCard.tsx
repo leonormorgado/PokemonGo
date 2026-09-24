@@ -1,8 +1,8 @@
-import { useEffect, useState, type MouseEvent } from 'react';
+import { memo, useState, type MouseEvent } from 'react';
 import { Share2 } from 'lucide-react';
 import { useTranslations } from '../../../shared/hooks/useTranslations.js';
 import type { CatalogEntry } from '../domain/pokemon.types.js';
-import { sharePokemonCard } from '../strategies/export/share.js';
+import { ShareDeckModal } from './ShareDeckModal.js';
 import { TypeBadge } from './TypeBadge.js';
 
 interface PokemonCardProps {
@@ -16,7 +16,7 @@ interface PokemonCardProps {
 
 const INK = '#241F1A';
 
-export function PokemonCard({
+function PokemonCardComponent({
   entry,
   onToggleCaught,
   onSelect,
@@ -28,18 +28,11 @@ export function PokemonCard({
   const paddedId = String(entry.id).padStart(3, '0');
   const canSelect = entry.caught && Boolean(onToggleSelect) && selectMode;
   const ineligibleForSelection = selectMode && !entry.caught;
-  const [shareStatus, setShareStatus] = useState<string | null>(null);
+  const [showShare, setShowShare] = useState(false);
 
-  useEffect(() => {
-    if (!shareStatus) return;
-    const timeout = setTimeout(() => setShareStatus(null), 2000);
-    return () => clearTimeout(timeout);
-  }, [shareStatus]);
-
-  const handleShare = async (event: MouseEvent) => {
+  const handleShare = (event: MouseEvent) => {
     event.stopPropagation();
-    const { method } = await sharePokemonCard(entry);
-    setShareStatus(method === 'share' ? t('shareStatus.shared') : t('shareStatus.copied'));
+    setShowShare(true);
   };
 
   const handleCardClick = () => {
@@ -114,8 +107,8 @@ export function PokemonCard({
           )}
           <button
             type="button"
-            onClick={(event) => void handleShare(event)}
-            title={shareStatus ?? t('share')}
+            onClick={handleShare}
+            title={t('share')}
             aria-label={t('shareAria', { name: entry.name })}
             className="flex h-6 w-6 items-center justify-center rounded-md border-2 border-[#241F1A] bg-white text-[#241F1A] shadow-[1px_1px_0px_0px_rgba(0,0,0,0.2)] transition-colors hover:bg-gray-50"
           >
@@ -175,6 +168,16 @@ export function PokemonCard({
       >
         {entry.caught ? t('release') : t('catch')}
       </button>
+      {showShare && (
+        <ShareDeckModal
+          variant="pokemon"
+          pokemonId={entry.id}
+          pokemonName={entry.name}
+          onClose={() => setShowShare(false)}
+        />
+      )}
     </div>
   );
 }
+
+export const PokemonCard = memo(PokemonCardComponent);

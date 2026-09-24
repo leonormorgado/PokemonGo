@@ -4,26 +4,31 @@ import { useTranslations } from '../../../shared/hooks/useTranslations.js';
 import { deckShareApi } from '../api/deck-share.api.js';
 import { shareDeck } from '../strategies/export/share.js';
 
-export function ShareDeckModal({
-  pokemonIds,
-  onClose,
-}: {
-  pokemonIds: number[];
-  onClose: () => void;
-}) {
-  const t = useTranslations('deckShare');
+type ShareDeckModalProps =
+  | { variant?: 'deck'; pokemonIds: number[]; onClose: () => void }
+  | { variant: 'pokemon'; pokemonId: number; pokemonName: string; onClose: () => void };
+
+export function ShareDeckModal(props: ShareDeckModalProps) {
+  const { onClose } = props;
+  const isPokemonShare = props.variant === 'pokemon';
+  const t = useTranslations(isPokemonShare ? 'pokemonShare' : 'deckShare');
   const common = useTranslations('common');
   const [title, setTitle] = useState('');
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState(
+    isPokemonShare
+      ? `${window.location.origin}/share/pokemon/${String(props.pokemonId).padStart(3, '0')}`
+      : '',
+  );
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('');
 
   const create = async (event: FormEvent) => {
     event.preventDefault();
+    if (props.variant === 'pokemon') return;
     setBusy(true);
     setStatus('');
     try {
-      const deck = await deckShareApi.create(title.trim(), pokemonIds);
+      const deck = await deckShareApi.create(title.trim(), props.pokemonIds);
       setUrl(`${window.location.origin}/deck/${deck.key}`);
     } catch {
       setStatus(t('createError'));
@@ -43,7 +48,7 @@ export function ShareDeckModal({
 
   const share = async () => {
     try {
-      const result = await shareDeck(url, title.trim());
+      const result = await shareDeck(url, props.variant === 'pokemon' ? props.pokemonName : title.trim());
       setStatus(result.method === 'share' ? t('shared') : t('copied'));
     } catch {
       setStatus(t('copyError'));
@@ -58,7 +63,7 @@ export function ShareDeckModal({
       closeLabel={common('close')}
       contentClassName="w-full max-w-md rounded-lg border-4 border-[#241F1A] bg-[#F4EBE1] p-5 shadow-[4px_4px_0px_0px_#241F1A]"
     >
-      {!url ? (
+      {props.variant !== 'pokemon' && !url ? (
         <form onSubmit={(event) => void create(event)} className="space-y-4">
           <label className="block text-sm font-bold" htmlFor="deck-share-name">
             {t('titleLabel')}
@@ -73,26 +78,26 @@ export function ShareDeckModal({
             placeholder={t('titlePlaceholder')}
             className="w-full rounded border-2 border-[#241F1A] bg-white p-2 text-sm"
           />
-          <p className="text-xs">{t('count', { count: pokemonIds.length })}</p>
+          <p className="text-xs">{t('count', { count: props.pokemonIds.length })}</p>
           <button
             type="submit"
-            disabled={busy || !title.trim() || pokemonIds.length === 0}
+            disabled={busy || !title.trim() || props.pokemonIds.length === 0}
             className="rounded border-2 border-[#241F1A] bg-[#DE623C] px-4 py-2 text-xs font-black uppercase text-white disabled:opacity-50"
           >
             {busy ? t('creating') : t('create')}
           </button>
         </form>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 text-center">
           <p className="text-xs font-bold">{t('ready')}</p>
           <input
             readOnly
             aria-label={t('linkLabel')}
             value={url}
             onFocus={(event) => event.target.select()}
-            className="w-full rounded border-2 border-[#241F1A] bg-white p-2 text-xs"
+            className="w-full rounded border-2 border-[#241F1A] bg-white p-2 text-center text-xs"
           />
-          <div className="flex gap-2">
+          <div className="flex justify-center gap-2">
             <button
               type="button"
               onClick={() => void copy()}

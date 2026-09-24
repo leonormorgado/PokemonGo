@@ -9,34 +9,6 @@ export interface PokemonShareResult {
   method: 'share' | 'clipboard';
 }
 
-/**
- * Shares a deep-link to a single Pokémon, falling back to a clipboard copy when the
- * Web Share API is unavailable or the user's browser blocks file/text sharing. The deep
- * link opens this app's own detail modal (with the trainer's caught status/notes),
- * rather than a third-party page with no knowledge of the user's local Pokédex state.
- */
-export async function sharePokemonCard(entry: {
-  id: number;
-  name: string;
-}): Promise<PokemonShareResult> {
-  const url = `${window.location.origin}/pokemon/${String(entry.id).padStart(3, '0')}`;
-
-  if (typeof navigator !== 'undefined' && navigator.share) {
-    try {
-      await navigator.share({ title: entry.name, text: entry.name, url });
-      return { method: 'share' };
-    } catch (error) {
-      // AbortError means the user cancelled the share sheet; treat as handled, not a failure.
-      if (error instanceof Error && error.name === 'AbortError') {
-        return { method: 'share' };
-      }
-    }
-  }
-
-  await navigator.clipboard.writeText(url);
-  return { method: 'clipboard' };
-}
-
 /** Shares a server-created deck link, falling back to clipboard copy. */
 export async function shareDeck(url: string, title: string): Promise<PokemonShareResult> {
   if (typeof navigator !== 'undefined' && navigator.share) {

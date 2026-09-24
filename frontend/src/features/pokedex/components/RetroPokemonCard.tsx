@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { CalendarDays, Ruler, Shuffle, Weight, FileText, Share2 } from 'lucide-react';
 import { colors, typeColors, DEFAULT_TYPE_COLOR } from '../../../shared/styles/colors.js';
 import { useTranslations } from '@/shared/hooks/useTranslations.js';
@@ -35,6 +35,7 @@ interface RetroPokemonCardProps {
   onToggleCaught?: () => void;
   onShare?: () => void;
   shareLabel?: string;
+  hideCaughtStatus?: boolean;
 }
 
 interface ColorScheme {
@@ -84,8 +85,8 @@ const COLOR_SCHEMES: ColorScheme[] = [
     accent: colors.dustyCherryPink,
     gauge: colors.dustyCherryPink,
     badge: colors.inkBlack,
-    }
-];255
+  },
+];
 
 const STAT_MAX = 180;
 const STAT_SEGMENTS = 10;
@@ -120,7 +121,7 @@ function gridStyle(lineColor: string) {
   };
 }
 
-export function RetroPokemonCard({
+function RetroPokemonCardComponent({
   pokemon,
   notes,
   notesLabel,
@@ -130,6 +131,7 @@ export function RetroPokemonCard({
   shareLabel,
   onNotesBlur,
   onToggleCaught,
+  hideCaughtStatus,
 }: RetroPokemonCardProps) {
   const initialScheme = useMemo(() => pickRandomScheme(), []);
   const [currentScheme, setCurrentScheme] = useState<ColorScheme>(initialScheme);
@@ -313,17 +315,19 @@ export function RetroPokemonCard({
               <Weight size={12} />
               <span>{pokemon.weight.toFixed(1)} kg</span>
             </div>
-            <div
-              className="col-span-2 flex items-center gap-1.5 border-t pt-1"
-              style={{ borderColor: `${colors.inkBlack}33` }}
-            >
-              <CalendarDays size={12} />
-              <span style={pokemon.caught ? undefined : { color: `${colors.inkBlack}80` }}>
-                {pokemon.caught && pokemon.caughtDate
-                  ? t('firstAdded', { date: new Date(pokemon.caughtDate).toLocaleDateString() })
-                  : t('notAddedToPokedex')}
-              </span>
-            </div>
+            {!hideCaughtStatus && (
+              <div
+                className="col-span-2 flex items-center gap-1.5 border-t pt-1"
+                style={{ borderColor: `${colors.inkBlack}33` }}
+              >
+                <CalendarDays size={12} />
+                <span style={pokemon.caught ? undefined : { color: `${colors.inkBlack}80` }}>
+                  {pokemon.caught && pokemon.caughtDate
+                    ? t('firstAdded', { date: new Date(pokemon.caughtDate).toLocaleDateString() })
+                    : t('notAddedToPokedex')}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Base Statistics Box */}
@@ -400,3 +404,5 @@ export function RetroPokemonCard({
     </div>
   );
 }
+
+export const RetroPokemonCard = memo(RetroPokemonCardComponent);
