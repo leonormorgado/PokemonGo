@@ -1,50 +1,66 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { RetroLoader } from '../../../shared/components/RetroLoader.js';
+import { RetroSelect } from '../../../shared/components/RetroSelect.js';
 import { useTranslations } from '../../../shared/hooks/useTranslations.js';
 import type { CatalogEntry } from '../domain/pokemon.types.js';
 import { usePokemonTableData, type TableEntry } from '../hooks/usePokemonTableData.js';
 import { TypeBadge } from './TypeBadge.js';
 
-type TableColumn =
-  | 'status'
-  | 'name'
-  | 'types'
-  | 'caughtAt'
-  | 'hp'
-  | 'attack'
-  | 'defense'
-  | 'speed'
-  | 'height'
-  | 'weight';
+// 'dex' is the default sort order and is also rendered as the first column
+type TableColumn = 'dex' | 'status' | 'name' | 'types' | 'caughtAt' | 'stats';
 type SortDirection = 'asc' | 'desc';
 
-const COLUMN_KEYS: TableColumn[] = [
-  'status',
-  'name',
-  'types',
-  'caughtAt',
-  'hp',
-  'attack',
-  'defense',
-  'speed',
-  'height',
-  'weight',
-];
+const COLUMN_KEYS: TableColumn[] = ['dex', 'status', 'name', 'types', 'caughtAt', 'stats'];
 
-// table-fixed requires explicit widths per column to keep the table within its container
+// table-fixed requires explicit widths per column to keep the table within its container;
+// dex is narrower (short fixed-width content), remaining columns share the rest evenly.
 const COLUMN_WIDTHS: Record<TableColumn, string> = {
-  status: 'w-20',
-  name: 'w-[15%]',
-  types: 'w-[17%]',
-  caughtAt: 'w-[12%]',
-  hp: 'w-[7%]',
-  attack: 'w-[8%]',
-  defense: 'w-[8%]',
-  speed: 'w-[7%]',
-  height: 'w-[10%]',
-  weight: 'w-[10%]',
+  dex: 'w-16',
+  status: 'w-1/5',
+  name: 'w-1/5',
+  types: 'w-1/5',
+  caughtAt: 'w-1/5',
+  stats: 'w-1/5',
 };
 const CHECKBOX_COLUMN_WIDTH = 'w-10';
 
+
+const PAGE_SIZE_OPTIONS = [20, 42, 100] as const;
+
+interface TablePagination {
+  page: number;
+  pageCount: number;
+  onGoToPage: (page: number) => void;
+  isLoadingNext?: boolean;
+  pageSize: number;
+  onPageSizeChange: (pageSize: number) => void;
+}
+
+function range(start: number, end: number): number[] {
+  const length = end - start + 1;
+  return Array.from({ length }, (_, index) => start + index);
+}
+
+// Builds `1 2 3 4 ... N` / `1 ... 11 12 13 ... N` / `1 ... N-3 N-2 N-1 N` page lists.
+function getPageNumbers(currentPage: number, pageCount: number): Array<number | 'ellipsis'> {
+  const siblingCount = 1;
+  const edgeCount = siblingCount * 2 + 2;
+
+  if (pageCount <= edgeCount * 2 + 1) return range(1, pageCount);
+
+  const leftSibling = Math.max(currentPage - siblingCount, 1);
+  const rightSibling = Math.min(currentPage + siblingCount, pageCount);
+  const showLeftDots = leftSibling > 2;
+  const showRightDots = rightSibling < pageCount - 1;
+
+  if (!showLeftDots && showRightDots) {
+    return [...range(1, edgeCount), 'ellipsis', pageCount];
+  }
+  if (showLeftDots && !showRightDots) {
+    return [1, 'ellipsis', ...range(pageCount - edgeCount + 1, pageCount)];
+  }
+  return [1, 'ellipsis', ...range(leftSibling, rightSibling), 'ellipsis', pageCount];
+}
 
 interface PokemonTableProps {
   entries: CatalogEntry[];
@@ -53,19 +69,21 @@ interface PokemonTableProps {
   selectedIds?: Set<number>;
   onToggleSelect?: (entry: CatalogEntry) => void;
   selectMode?: boolean;
+  pagination?: TablePagination;
 }
 
 function compareValues(a: TableEntry, b: TableEntry, column: TableColumn): number {
   if (column === 'status') return Number(b.caught) - Number(a.caught);
   if (column === 'name') return a.name.localeCompare(b.name);
+  if (column === 'dex') return a.id - b.id;
   if (column === 'types') return (a.types[0] ?? '').localeCompare(b.types[0] ?? '');
   if (column === 'caughtAt') {
     const aTime = a.caughtAt ? new Date(a.caughtAt).getTime() : 0;
     const bTime = b.caughtAt ? new Date(b.caughtAt).getTime() : 0;
     return aTime - bTime;
   }
-  const aValue = a[column] ?? -Infinity;
-  const bValue = b[column] ?? -Infinity;
+  const aValue = a.stats ?? -Infinity;
+  const bValue = b.stats ?? -Infinity;
   return aValue - bValue;
 }
 
@@ -76,11 +94,20 @@ export function PokemonTable({
   selectedIds,
   onToggleSelect,
   selectMode = false,
+  pagination,
 }: PokemonTableProps) {
   const t = useTranslations('table');
   const { rows, isLoading } = usePokemonTableData(entries);
-  const [sortColumn, setSortColumn] = useState<TableColumn>('name');
+  const [sortColumn, setSortColumn] = useState<TableColumn>('dex');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [isEditingPage, setIsEditingPage] = useState(false);
+  const [pageInputValue, setPageInputValue] = useState('');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const pageInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    scrollContainerRef.current?.scrollTo({ top: 0 });
+  }, [pagination?.page]);
 
   const sortedRows = useMemo(() => {
     const sorted = [...rows].sort((a, b) => compareValues(a, b, sortColumn));
@@ -98,6 +125,7 @@ export function PokemonTable({
 
   const getColumnLabel = (col: TableColumn) => {
     if (col === 'status') return t('columns.status');
+    if (col === 'dex') return t('columns.dex');
     return t(`columns.${col}`);
   };
 
@@ -106,13 +134,34 @@ export function PokemonTable({
     return new Date(value).toLocaleDateString();
   };
 
+  const openPageInput = () => {
+    if (!pagination) return;
+    setPageInputValue(String(pagination.page + 1));
+    setIsEditingPage(true);
+  };
+
+  const submitPageInput = () => {
+    if (!pagination) return;
+    const target = Number(pageInputValue);
+    if (Number.isInteger(target) && target >= 1 && target <= pagination.pageCount) {
+      pagination.onGoToPage(target - 1);
+    }
+    setIsEditingPage(false);
+  };
+
   return (
     /* overflow-hidden + rounded-xl ensures outer hard border corners remain curved */
     <div
-      className="hidden max-h-[72vh] overflow-hidden rounded-xl border-4 border-[#241F1A] bg-[#FFFACF] font-mono text-[#241F1A] shadow-[5px_5px_0px_0px_#241F1A] md:block"
+      className="relative hidden max-h-[72vh] flex-col overflow-hidden rounded-xl border-4 border-[#241F1A] bg-[#FFFACF] font-mono text-[#241F1A] shadow-[5px_5px_0px_0px_#241F1A] md:flex"
       data-testid="pokemon-table"
     >
-      <div className="max-h-[72vh] overflow-y-auto overflow-x-hidden [scrollbar-color:#241F1A_#FFFACF]">
+      {pagination?.isLoadingNext && (
+        <RetroLoader label={t('jumpingToPage')} testId="pokemon-table-loader" />
+      )}
+      <div
+        ref={scrollContainerRef}
+        className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden [scrollbar-color:#241F1A_#FFFACF]"
+      >
         <table className="w-full table-fixed border-collapse text-xs font-bold">
           <thead className="sticky top-0 z-10 bg-[#241F1A] text-white">
             <tr>
@@ -131,7 +180,7 @@ export function PokemonTable({
                     <button
                       type="button"
                       onClick={() => handleSort(column)}
-                      className="flex items-center gap-1 whitespace-nowrap px-1 py-1 text-[#FFFACF] transition-colors hover:opacity-80"
+                      className="flex items-center gap-1 px-1 py-1 text-[#FFFACF] transition-colors hover:opacity-80"
                     >
                       <span>{getColumnLabel(column)}</span>
                       <span className="text-[9px] leading-none">
@@ -182,6 +231,11 @@ export function PokemonTable({
                     />
                   </td>
                 )}
+                {/* Dex Number */}
+                <td className="px-3 py-2 font-black tracking-wide text-[#241F1A]">
+                  #{String(row.id).padStart(3, '0')}
+                </td>
+
                 {/* Status / Catch-Release Column */}
                 <td className="px-3 py-2" onClick={(event) => event.stopPropagation()}>
                   {row.caught ? (
@@ -223,28 +277,121 @@ export function PokemonTable({
                   </div>
                 </td>
 
-                {/* Caught Date */}
-                <td className="px-3 py-2">
-                  {formatCaughtAt(row.caughtAt) ?? t('emptyCell')}
+                {/* Caught Status */}
+                <td className="px-3 py-2 text-center" title={formatCaughtAt(row.caughtAt) ?? undefined}>
+                  {row.caughtAt ? <span className="text-[#2E7D32]">✓</span> : t('emptyCell')}
                 </td>
 
-                {/* Stats */}
-                <td className="px-3 py-2">{row.hp ?? (isLoading ? t('loadingCell') : t('emptyCell'))}</td>
-                <td className="px-3 py-2">{row.attack ?? (isLoading ? t('loadingCell') : t('emptyCell'))}</td>
-                <td className="px-3 py-2">{row.defense ?? (isLoading ? t('loadingCell') : t('emptyCell'))}</td>
-                <td className="px-3 py-2">{row.speed ?? (isLoading ? t('loadingCell') : t('emptyCell'))}</td>
-                <td className="px-3 py-2">
-                  {row.height ? `${row.height.toFixed(1)} m` : isLoading ? t('loadingCell') : t('emptyCell')}
-                </td>
-                <td className="px-3 py-2">
-                  {row.weight ? `${row.weight.toFixed(1)} kg` : isLoading ? t('loadingCell') : t('emptyCell')}
-                </td>
+                {/* Base Stat Total (hp + attack + defense + speed only; see usePokemonTableData) */}
+                <td className="px-3 py-2">{row.stats ?? (isLoading ? t('loadingCell') : t('emptyCell'))}</td>
               </tr>
               );
             })}
           </tbody>
         </table>
       </div>
+      {pagination && (
+        <div className="flex shrink-0 flex-wrap items-center justify-center gap-3 border-t-4 border-[#241F1A] bg-[#241F1A] px-3 py-2 text-white">
+          <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider">
+            {t('rowsPerPage')}
+            <RetroSelect
+              value={pagination.pageSize}
+              options={PAGE_SIZE_OPTIONS}
+              onChange={pagination.onPageSizeChange}
+              label={t('rowsPerPage')}
+            />
+          </div>
+          {pagination.pageCount > 1 && (
+            <div className="flex items-center gap-2">
+              {isEditingPage ? (
+                <span className="mr-1 flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-white/70">
+                  <input
+                    ref={pageInputRef}
+                    type="number"
+                    min={1}
+                    max={pagination.pageCount}
+                    value={pageInputValue}
+                    autoFocus
+                    onChange={(event) => setPageInputValue(event.target.value)}
+                    onBlur={submitPageInput}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') submitPageInput();
+                      if (event.key === 'Escape') setIsEditingPage(false);
+                    }}
+                    className="w-10 rounded-md border-2 border-[#241F1A] bg-[#FFFACF] px-1 py-0.5 text-center text-[10px] font-black text-[#241F1A]"
+                  />
+                  / {pagination.pageCount}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={openPageInput}
+                  className="mr-1 rounded-md px-1 text-[10px] font-black uppercase tracking-wider text-white/70 transition-colors hover:text-white hover:underline"
+                >
+                  {t('pageIndicator', { page: pagination.page + 1, pageCount: pagination.pageCount })}
+                </button>
+              )}
+              <button
+                type="button"
+                aria-label={t('firstPage')}
+                onClick={() => pagination.onGoToPage(0)}
+                disabled={pagination.page === 0}
+                className="rounded-md border-2 border-white px-2 py-1 text-[10px] font-black transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                &lt;&lt;
+              </button>
+              <button
+                type="button"
+                aria-label={t('prevPage')}
+                onClick={() => pagination.onGoToPage(pagination.page - 1)}
+                disabled={pagination.page === 0}
+                className="rounded-md border-2 border-white px-2 py-1 text-[10px] font-black transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                &lt;
+              </button>
+              {getPageNumbers(pagination.page + 1, pagination.pageCount).map((entry, index) =>
+                entry === 'ellipsis' ? (
+                  <span key={`ellipsis-${index}`} className="px-1 text-[10px] font-black">
+                    …
+                  </span>
+                ) : (
+                  <button
+                    key={entry}
+                    type="button"
+                    onClick={() => pagination.onGoToPage(entry - 1)}
+                    aria-current={pagination.page === entry - 1 ? 'page' : undefined}
+                    className={`rounded-md border-2 px-2 py-1 text-[10px] font-black transition-colors ${
+                      pagination.page === entry - 1
+                        ? 'border-[#241F1A] bg-[#DE623C] text-white shadow-[1px_1px_0px_0px_#241F1A]'
+                        : 'border-white hover:bg-white/10'
+                    }`}
+                  >
+                    {entry}
+                  </button>
+                ),
+              )}
+              <button
+                type="button"
+                aria-label={t('nextPage')}
+                onClick={() => pagination.onGoToPage(pagination.page + 1)}
+                disabled={pagination.page >= pagination.pageCount - 1 || pagination.isLoadingNext}
+                className="rounded-md border-2 border-white px-2 py-1 text-[10px] font-black transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                &gt;
+              </button>
+              <button
+                type="button"
+                aria-label={t('lastPage')}
+                onClick={() => pagination.onGoToPage(pagination.pageCount - 1)}
+                disabled={pagination.page >= pagination.pageCount - 1 || pagination.isLoadingNext}
+                className="rounded-md border-2 border-white px-2 py-1 text-[10px] font-black transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                &gt;&gt;
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

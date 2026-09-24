@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
 
+/**
+ * Tracks browser connectivity via the `online`/`offline` window events, so components (e.g.
+ * `OfflineStatusBanner`) can react without polling `navigator.onLine` themselves.
+ */
 export function useOnlineStatus(): boolean {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 

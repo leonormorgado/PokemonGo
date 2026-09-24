@@ -18,6 +18,12 @@ function getDb(): Promise<IDBPDatabase> {
   return dbPromise;
 }
 
+/**
+ * IndexedDB-backed store for trainer-owned data (caught status, timestamp, notes, tags).
+ * Deliberately separate from the React Query cache/persister: this data must never be
+ * evicted like a cache entry, since it represents the user's actual progress, not fetched
+ * server state.
+ */
 export const caughtRecordsStore = {
   async getAll(): Promise<CaughtRecord[]> {
     const db = await getDb();

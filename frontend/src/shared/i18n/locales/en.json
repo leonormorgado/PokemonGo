@@ -16,6 +16,8 @@
     "caughtOnly": "Caught only",
     "exportCsv": "Export CSV",
     "share": "Share",
+    "shareDeck": "Share Deck",
+    "sharedDeckBanner": "Viewing Trainer's Collection ({{count}}/{{total}} Caught)",
     "shareStatus": {
       "shared": "Shared!",
       "copied": "Copied to clipboard",
@@ -24,6 +26,7 @@
     "viewGrid": "Grid",
     "viewTable": "Table",
     "loading": "Loading Pokédex...",
+    "sorting": "Sorting them all...",
     "selectedCount": "{{count}} selected",
     "releaseSelected": "Release selected",
     "clearSelection": "Clear",
@@ -33,13 +36,19 @@
     "sortOptions": {
       "nameAsc": "Name (A-Z)",
       "nameDesc": "Name (Z-A)",
+      "idAsc": "Dex # (Low-High)",
+      "idDesc": "Dex # (High-Low)",
       "caughtAtDesc": "Recently Caught",
       "caughtAtAsc": "Oldest Caught",
       "heightAsc": "Height (Low-High)",
       "heightDesc": "Height (High-Low)"
     },
     "typeFilter": "Types",
-    "clearTypeFilter": "Clear"
+    "clearTypeFilter": "Clear",
+    "idFilter": "Dex #",
+    "loadMore": "Load more",
+    "loadingMore": "Loading...",
+    "loadMoreCount": "Showing {{count}} of {{total}}"
   },
   "card": {
     "caught": "Caught",
@@ -54,6 +63,7 @@
       "copied": "Link copied!"
     },
     "notAddedToPokedex": "Not yet added to Pokédex",
+    "firstAdded": "First added {{date}}",
     "shuffleColorScheme": "Shuffle Color Scheme",
     "statAbbr": {
       "hp": "HP",
@@ -71,19 +81,24 @@
     "release": "Release",
     "columns": {
       "select": "",
+      "dex": "#",
       "status": "Status",
       "name": "Name",
       "types": "Types",
       "caughtAt": "Caught",
-      "hp": "HP",
-      "attack": "Attack",
-      "defense": "Defense",
-      "speed": "Speed",
-      "height": "Height",
-      "weight": "Weight"
+      "stats": "BST"
     },
     "loadingCell": "…",
-    "emptyCell": "—"
+    "emptyCell": "—",
+    "prevPage": "Previous",
+    "nextPage": "Next",
+    "firstPage": "First page",
+    "lastPage": "Last page",
+    "rowsPerPage": "Rows per page",
+    "loadingMore": "Loading...",
+    "pageIndicator": "Page {{page}} of {{pageCount}}",
+    "goToPage": "Go to page",
+    "jumpingToPage": "Catching them all..."
   },
   "detail": {
     "loading": "Loading details...",
@@ -112,6 +127,12 @@
   },
   "progress": {
     "caughtCount": "Caught: {{caught}} / {{total}}"
+  },
+  "emptyDeck": {
+    "title": "Your deck is empty!",
+    "subtitle": "Go catch some Pokémon to start building your collection.",
+    "noResultsTitle": "No results found!",
+    "noResultsSubtitle": "No Pokémon match your current search/filters."
   },
   "offline": {
     "offlineMode": "Offline mode — showing cached data",

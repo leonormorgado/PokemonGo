@@ -43,9 +43,11 @@ export class HeightSortStrategy implements SortStrategy {
 
   compare(a: CatalogEntry, b: CatalogEntry): number {
     // Entries without fetched height data yet are pushed to the end regardless of direction.
-    if (a.height == null && b.height == null) return 0;
+    if (a.height == null && b.height == null) return a.id - b.id;
     if (a.height == null) return 1;
     if (b.height == null) return -1;
+    // Tie-break equal heights by Dex ID ascending, independent of the primary sort direction.
+    if (a.height === b.height) return a.id - b.id;
     return applyDirection(a.height - b.height, this.direction);
   }
 }

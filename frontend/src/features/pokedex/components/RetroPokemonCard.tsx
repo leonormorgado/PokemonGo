@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CalendarDays, Ruler, Shuffle, Weight, FileText } from 'lucide-react';
+import { CalendarDays, Ruler, Shuffle, Weight, FileText, Share2 } from 'lucide-react';
 import { colors, typeColors, DEFAULT_TYPE_COLOR } from '../../../shared/styles/colors.js';
 import { useTranslations } from '@/shared/hooks/useTranslations.js';
 
@@ -33,6 +33,8 @@ interface RetroPokemonCardProps {
   onNotesChange?: (notes: string) => void;
   onNotesBlur?: () => void;
   onToggleCaught?: () => void;
+  onShare?: () => void;
+  shareLabel?: string;
 }
 
 interface ColorScheme {
@@ -83,7 +85,7 @@ const COLOR_SCHEMES: ColorScheme[] = [
     gauge: colors.dustyCherryPink,
     badge: colors.inkBlack,
     }
-];
+];255
 
 const STAT_MAX = 180;
 const STAT_SEGMENTS = 10;
@@ -124,6 +126,8 @@ export function RetroPokemonCard({
   notesLabel,
   notesPlaceholder,
   onNotesChange,
+  onShare,
+  shareLabel,
   onNotesBlur,
   onToggleCaught,
 }: RetroPokemonCardProps) {
@@ -201,6 +205,22 @@ export function RetroPokemonCard({
               >
                 <Shuffle size={12} />
               </button>
+
+              {onShare && (
+                <button
+                  type="button"
+                  onClick={onShare}
+                  title={shareLabel ?? t('share')}
+                  className="flex h-7 w-7 items-center justify-center rounded border-2 shadow-[2px_2px_0_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5"
+                  style={{
+                    borderColor: colors.inkBlack,
+                    backgroundColor: colors.goldenMimikyuCream,
+                    color: colors.inkBlack,
+                  }}
+                >
+                  <Share2 size={12} />
+                </button>
+              )}
 
               {onToggleCaught && (
                 <button
@@ -300,7 +320,7 @@ export function RetroPokemonCard({
               <CalendarDays size={12} />
               <span style={pokemon.caught ? undefined : { color: `${colors.inkBlack}80` }}>
                 {pokemon.caught && pokemon.caughtDate
-                  ? `First added ${new Date(pokemon.caughtDate).toLocaleDateString()}`
+                  ? t('firstAdded', { date: new Date(pokemon.caughtDate).toLocaleDateString() })
                   : t('notAddedToPokedex')}
               </span>
             </div>

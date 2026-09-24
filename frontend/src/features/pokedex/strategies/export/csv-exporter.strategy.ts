@@ -13,6 +13,10 @@ function escapeCsvValue(value: string): string {
   return value;
 }
 
+/**
+ * CSV export strategy — one of several `ExporterStrategy` implementations, chosen behind an
+ * interface so a JSON/PDF exporter can be added later without changing call sites.
+ */
 export class CSVExporterStrategy implements ExporterStrategy {
   mimeType = 'text/csv';
   fileExtension = 'csv';
@@ -36,6 +40,7 @@ export class CSVExporterStrategy implements ExporterStrategy {
   }
 }
 
+/** Triggers a browser file download as the last-resort export fallback (no share/clipboard support). */
 export function downloadExport(strategy: ExporterStrategy, entries: CatalogEntry[], filename: string): void {
   const content = strategy.export(entries);
   const blob = new Blob([content], { type: strategy.mimeType });

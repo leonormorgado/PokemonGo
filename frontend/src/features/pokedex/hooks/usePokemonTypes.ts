@@ -4,7 +4,10 @@ import { pokedexApi } from '../api/pokedex.api.js';
 import { pokedexKeys } from '../api/pokedex.keys.js';
 import type { CatalogEntry, PokemonDetail } from '../domain/pokemon.types.js';
 
-// Batches per-entry detail fetches to hydrate elemental types and height (list endpoint omits them).
+/**
+ * Batches per-entry detail fetches to hydrate elemental types and height (list endpoint omits them).
+ * `staleTime: Infinity` because a Pokémon's types/height never change, so there's no reason to refetch.
+ */
 export function usePokemonTypes(entries: CatalogEntry[]): CatalogEntry[] {
   const detailQueries = useQueries({
     queries: entries.map((entry) => ({

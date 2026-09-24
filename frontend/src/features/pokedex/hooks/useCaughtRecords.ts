@@ -3,6 +3,11 @@ import { caughtRecordsStore } from '../../offline/services/caught-records.store.
 import type { CaughtRecord } from '../domain/pokemon.types.js';
 import { pokedexKeys } from '../api/pokedex.keys.js';
 
+/**
+ * Reads all trainer-owned catch records from IndexedDB.
+ * `staleTime: Infinity` because this data only changes via the mutations below, which
+ * explicitly invalidate this query key — polling/refetching would just re-read the same store.
+ */
 export function useCaughtRecords() {
   return useQuery({
     queryKey: pokedexKeys.caughtRecords,
@@ -11,6 +16,7 @@ export function useCaughtRecords() {
   });
 }
 
+/** Marks a Pokémon as caught with a timestamp; invalidates the cache so all views stay in sync. */
 export function useCatchPokemon() {
   const queryClient = useQueryClient();
 
@@ -40,6 +46,7 @@ export function useCatchPokemon() {
   });
 }
 
+/** Deletes a single caught record (release), rather than a soft `caught: false` flag, since notes/tags for a released Pokémon aren't a requirement worth persisting. */
 export function useReleasePokemon() {
   const queryClient = useQueryClient();
 
@@ -53,6 +60,7 @@ export function useReleasePokemon() {
   });
 }
 
+/** Bulk-release: batches deletes in one IndexedDB transaction so the UI only invalidates/re-renders once instead of once per Pokémon. */
 export function useReleaseManyPokemon() {
   const queryClient = useQueryClient();
 
@@ -66,6 +74,11 @@ export function useReleaseManyPokemon() {
   });
 }
 
+/**
+ * Updates the notes on a caught record. Reads the existing record first (rather than assuming
+ * `caught: true`) so notes can also be attached to a not-yet-caught entry without clobbering
+ * its caught/tags state.
+ */
 export function useUpdateNote() {
   const queryClient = useQueryClient();
 
@@ -88,6 +101,7 @@ export function useUpdateNote() {
   });
 }
 
+/** Updates tags the same way as `useUpdateNote` — reads existing record first to avoid clobbering caught/notes state. */
 export function useUpdateTags() {
   const queryClient = useQueryClient();
 

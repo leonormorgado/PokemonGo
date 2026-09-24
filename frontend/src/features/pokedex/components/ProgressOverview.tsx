@@ -1,19 +1,26 @@
 import { useMemo } from 'react';
 import type { CatalogEntry } from '../domain/pokemon.types.js';
 import { computeProgressStats } from '../utils/progress-stats.js';
+import { useTypeTotals } from '../hooks/useTypeTotals.js';
 import { useTranslations } from '../../../shared/hooks/useTranslations.js';
 
 interface ProgressOverviewProps {
   entries: CatalogEntry[];
+  totalOverride?: number;
 }
 
 const INK = '#241F1A';
 
-export function ProgressOverview({ entries }: ProgressOverviewProps) {
+export function ProgressOverview({ entries, totalOverride }: ProgressOverviewProps) {
   const t = useTranslations('progress');
-  const { caughtCount, totalCount, percentCaught, typeDistribution } = useMemo(
-    () => computeProgressStats(entries),
+  const loadedTypes = useMemo(
+    () => Array.from(new Set(entries.flatMap((entry) => entry.types))).sort(),
     [entries],
+  );
+  const typeTotals = useTypeTotals(loadedTypes);
+  const { caughtCount, totalCount, percentCaught, typeDistribution } = useMemo(
+    () => computeProgressStats(entries, totalOverride, typeTotals),
+    [entries, totalOverride, typeTotals],
   );
 
   return (
@@ -66,7 +73,7 @@ export function ProgressOverview({ entries }: ProgressOverviewProps) {
             >
               <span className="truncate tracking-wide">{type}</span>
               <span className="font-black text-[#C98A4D]">
-                {caught}/{total}
+                {caught} / {total}
               </span>
             </div>
           ))}

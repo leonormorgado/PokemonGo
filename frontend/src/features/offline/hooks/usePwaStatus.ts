@@ -7,7 +7,11 @@ export interface PwaStatus {
   dismiss: () => void;
 }
 
-// Wraps vite-plugin-pwa's registration hook: tracks offline-ready caching and available updates.
+/**
+ * Wraps vite-plugin-pwa's registration hook: tracks offline-ready caching and available updates.
+ * Update installs are deferred until the user acts (`updateServiceWorker`) rather than reloading
+ * automatically, so an in-progress catch/note edit is never lost to a surprise refresh.
+ */
 export function usePwaStatus(): PwaStatus {
   const {
     offlineReady: [offlineReady, setOfflineReady],

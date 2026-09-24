@@ -4,15 +4,13 @@ import { pokedexKeys } from '../api/pokedex.keys.js';
 import type { CatalogEntry, PokemonDetail } from '../domain/pokemon.types.js';
 
 export interface TableEntry extends CatalogEntry {
-  hp: number | null;
-  attack: number | null;
-  defense: number | null;
-  speed: number | null;
-  height: number | null;
-  weight: number | null;
+  stats: number | null;
 }
 
-// Batches per-entry detail fetches (stats/height/weight) needed for the analytical table view.
+/**
+ * Batches per-entry detail fetches (stats/height/weight) needed for the analytical table view.
+ * Uses `useQueries` (not sequential fetches) so all rows on the current page resolve in parallel.
+ */
 export function usePokemonTableData(entries: CatalogEntry[]) {
   const detailQueries = useQueries({
     queries: entries.map((entry) => ({
@@ -25,14 +23,11 @@ export function usePokemonTableData(entries: CatalogEntry[]) {
 
   const rows: TableEntry[] = entries.map((entry, index) => {
     const detail = detailQueries[index]?.data as PokemonDetail | undefined;
+    const stats = detail?.stats;
+    // Partial base stat total: sum of hp/attack/defense/speed only (excludes sp-attack/sp-defense).
     return {
       ...entry,
-      hp: detail?.stats.hp ?? null,
-      attack: detail?.stats.attack ?? null,
-      defense: detail?.stats.defense ?? null,
-      speed: detail?.stats.speed ?? null,
-      height: detail?.height ?? null,
-      weight: detail?.weight ?? null,
+      stats: stats ? stats.hp + stats.attack + stats.defense + stats.speed : null,
     };
   });
 

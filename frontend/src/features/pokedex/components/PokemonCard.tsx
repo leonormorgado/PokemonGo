@@ -57,14 +57,20 @@ export function PokemonCard({
       aria-checked={canSelect ? selected : undefined}
       className={`group relative flex h-[240px] flex-col justify-between rounded-xl border-3 border-[#241F1A] p-3 font-mono text-[#241F1A] shadow-[4px_4px_0px_0px_#241F1A] transition-all hover:-translate-y-0.5 ${
         canSelect ? 'cursor-pointer' : ''
-      } ${ineligibleForSelection ? 'pointer-events-none opacity-50' : ''} ${
+      } ${ineligibleForSelection ? 'pointer-events-none' : ''} ${
         selected ? 'bg-[#E8AEEC]/30 ring-4 ring-[#DE623C]' : 'bg-[#FFFACF]'
       }`}
     >
       {ineligibleForSelection && (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 z-20 rounded-xl bg-[#241F1A]/35"
+        />
+      )}
+      {ineligibleForSelection && (
         <span
           aria-hidden="true"
-          className="absolute left-3 top-3 z-20 flex h-6 w-6 items-center justify-center rounded-md border-2 border-[#241F1A] bg-white text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)]"
+          className="absolute left-3 top-3 z-30 flex h-6 w-6 items-center justify-center rounded-md border-2 border-[#241F1A] bg-white text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)]"
         >
           🔒
         </span>

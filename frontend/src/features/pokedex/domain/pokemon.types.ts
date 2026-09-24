@@ -41,7 +41,12 @@ export interface CatalogEntry extends PokemonSummary {
   height?: number | null;
 }
 
-export type SortField = 'name' | 'height' | 'types' | 'caughtAt';
+export interface IdRange {
+  min: number;
+  max: number;
+}
+
+export type SortField = 'name' | 'id' | 'height' | 'types' | 'caughtAt';
 export type SortDirection = 'asc' | 'desc';
 
 export interface SortOption {
@@ -53,4 +58,5 @@ export interface FilterOptions {
   search: string;
   types: string[];
   caughtOnly: boolean;
+  idRange?: IdRange | null;
 }

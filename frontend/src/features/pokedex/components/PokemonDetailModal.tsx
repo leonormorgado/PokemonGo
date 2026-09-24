@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Share2 } from 'lucide-react';
 import { Modal } from '../../../shared/components/Modal.js';
 import { usePokemonDetail } from '../hooks/usePokemonDetail.js';
 import { RetroPokemonCard } from './RetroPokemonCard.js';
@@ -70,15 +69,6 @@ export function PokemonDetailModal({ entry, onClose, onSaveNote, onToggleCaught 
               >
                 ✕ {tCommon('close')}
               </button>
-              <button
-                type="button"
-                onClick={() => void handleShare()}
-                title={shareStatus ?? t('share')}
-                className="flex items-center gap-1.5 rounded border-2 border-[#2d221e] bg-white px-3 py-1 text-xs font-black uppercase text-[#2d221e] hover:bg-gray-50 shadow-[3px_3px_0px_0px_rgba(0,0,0,0.85)] active:translate-x-0.5 active:translate-y-0.5"
-              >
-                <Share2 className="h-3.5 w-3.5" />
-                {shareStatus ?? t('share')}
-              </button>
             </div>
 
             {/* Retro Card Component */}
@@ -100,6 +90,8 @@ export function PokemonDetailModal({ entry, onClose, onSaveNote, onToggleCaught 
               onNotesChange={setNotes}
               onNotesBlur={handleBlur}
               onToggleCaught={onToggleCaught ? () => onToggleCaught(entry) : undefined}
+              onShare={() => void handleShare()}
+              shareLabel={shareStatus ?? t('share')}
             />
           </div>
         )}

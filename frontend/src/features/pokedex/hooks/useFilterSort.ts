@@ -3,10 +3,15 @@ import type { CatalogEntry, FilterOptions, SortOption } from '../domain/pokemon.
 import { applyFilters } from '../strategies/filter/filter-strategy.js';
 import { createSortStrategy } from '../strategies/sort/sort-strategy.factory.js';
 
-const DEFAULT_FILTERS: FilterOptions = { search: '', types: [], caughtOnly: false };
-const DEFAULT_SORT: SortOption = { field: 'name', direction: 'asc' };
+const DEFAULT_FILTERS: FilterOptions = { search: '', types: [], caughtOnly: false, idRange: null };
+const DEFAULT_SORT: SortOption = { field: 'id', direction: 'asc' };
 
-// Combines the filter and sort strategy pattern with the search/sort UI state.
+/**
+ * Combines the filter and sort strategy pattern with the search/sort UI state.
+ * @param entries The full catalog to derive from; filtering/sorting happen client-side
+ * since the whole catalog is already cached locally, avoiding a round trip per keystroke.
+ * @returns The filtered+sorted result plus the filter/sort state setters for the toolbar UI.
+ */
 export function useFilterSort(entries: CatalogEntry[]) {
   const [filters, setFilters] = useState<FilterOptions>(DEFAULT_FILTERS);
   const [sort, setSort] = useState<SortOption>(DEFAULT_SORT);

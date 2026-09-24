@@ -9,6 +9,8 @@ type ViewMode = 'grid' | 'table';
 const SORT_PRESETS: { value: string; sort: SortOption; labelKey: string }[] = [
   { value: 'name-asc', sort: { field: 'name', direction: 'asc' }, labelKey: 'nameAsc' },
   { value: 'name-desc', sort: { field: 'name', direction: 'desc' }, labelKey: 'nameDesc' },
+  { value: 'id-asc', sort: { field: 'id', direction: 'asc' }, labelKey: 'idAsc' },
+  { value: 'id-desc', sort: { field: 'id', direction: 'desc' }, labelKey: 'idDesc' },
   { value: 'caughtAt-desc', sort: { field: 'caughtAt', direction: 'desc' }, labelKey: 'caughtAtDesc' },
   { value: 'caughtAt-asc', sort: { field: 'caughtAt', direction: 'asc' }, labelKey: 'caughtAtAsc' },
   { value: 'height-asc', sort: { field: 'height', direction: 'asc' }, labelKey: 'heightAsc' },
@@ -23,8 +25,8 @@ type PokedexToolbarProps = {
   onCaughtOnlyChange: (value: boolean) => void;
   forceCaughtOnly: boolean;
   catalog: CatalogEntry[];
-  onShare: () => void;
-  shareStatus: string | null;
+  onShareDeck?: () => void;
+  readOnly?: boolean;
   selectMode: boolean;
   onToggleSelectMode: () => void;
   viewMode: ViewMode;
@@ -48,8 +50,8 @@ export function PokedexToolbar({
   onCaughtOnlyChange,
   forceCaughtOnly,
   catalog,
-  onShare,
-  shareStatus,
+  onShareDeck,
+  readOnly = false,
   selectMode,
   onToggleSelectMode,
   viewMode,
@@ -103,19 +105,21 @@ export function PokedexToolbar({
         </div>
 
         {/* Select Multiple Toggle */}
-        <button
-          type="button"
-          onClick={onToggleSelectMode}
-          aria-pressed={selectMode}
-          className={`flex items-center justify-center gap-1.5 whitespace-nowrap rounded border-2 border-[#241F1A] px-3 text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(36,31,26,1)] active:translate-x-0.5 active:translate-y-0.5 transition-all ${SELECT_MODE_BUTTON_WIDTH} ${BUTTON_HEIGHT} ${
-            selectMode
-              ? 'bg-[#DE623C] text-white hover:opacity-90'
-              : 'bg-white text-[#241F1A] hover:bg-gray-50'
-          }`}
-        >
-          <CheckSquare className="h-3.5 w-3.5" />
-          {selectMode ? t('exitSelectMode') : t('selectMultiple')}
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            onClick={onToggleSelectMode}
+            aria-pressed={selectMode}
+            className={`flex items-center justify-center gap-1.5 whitespace-nowrap rounded border-2 border-[#241F1A] px-3 text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(36,31,26,1)] active:translate-x-0.5 active:translate-y-0.5 transition-all ${SELECT_MODE_BUTTON_WIDTH} ${BUTTON_HEIGHT} ${
+              selectMode
+                ? 'bg-[#DE623C] text-white hover:opacity-90'
+                : 'bg-white text-[#241F1A] hover:bg-gray-50'
+            }`}
+          >
+            <CheckSquare className="h-3.5 w-3.5" />
+            {selectMode ? t('exitSelectMode') : t('selectMultiple')}
+          </button>
+        )}
 
         {/* View Mode Toggles */}
         <div className={`ml-auto flex shrink-0 items-center gap-1 rounded border-2 border-[#241F1A] bg-white p-1 shadow-[2px_2px_0px_0px_rgba(36,31,26,1)] ${BUTTON_HEIGHT}`}>
@@ -232,33 +236,31 @@ export function PokedexToolbar({
           </label>
         )}
 
-        {shareStatus && (
-          <span className="rounded border-2 border-dashed border-[#241F1A] bg-[#C98A4D]/20 px-2 py-1 text-xs font-bold text-[#241F1A]">
-            {shareStatus}
-          </span>
+        {/* Secondary Actions: Export */}
+        {!readOnly && (
+          <div className={`ml-auto flex shrink-0 items-center gap-1 rounded border-2 border-[#241F1A] bg-white p-1 shadow-[2px_2px_0px_0px_rgba(36,31,26,1)] ${BUTTON_HEIGHT}`}>
+            <button
+              type="button"
+              onClick={() => downloadExport(new CSVExporterStrategy(), catalog, 'pokedex')}
+              title={t('exportCsv')}
+              className="flex h-full items-center justify-center gap-1.5 whitespace-nowrap rounded px-2.5 text-xs font-black uppercase tracking-wider text-[#241F1A] transition-colors hover:bg-gray-100"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{t('exportCsv')}</span>
+            </button>
+            {onShareDeck && (
+              <button
+                type="button"
+                onClick={onShareDeck}
+                title={t('shareDeck')}
+                className="flex h-full items-center justify-center gap-1.5 whitespace-nowrap rounded px-2.5 text-xs font-black uppercase tracking-wider text-[#241F1A] transition-colors hover:bg-gray-100"
+              >
+                <Share2 className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{t('shareDeck')}</span>
+              </button>
+            )}
+          </div>
         )}
-
-        {/* Secondary Actions: Export / Share grouped to save horizontal space */}
-        <div className={`ml-auto flex shrink-0 items-center gap-1 rounded border-2 border-[#241F1A] bg-white p-1 shadow-[2px_2px_0px_0px_rgba(36,31,26,1)] ${BUTTON_HEIGHT}`}>
-          <button
-            type="button"
-            onClick={() => downloadExport(new CSVExporterStrategy(), catalog, 'pokedex')}
-            title={t('exportCsv')}
-            className="flex h-full items-center justify-center gap-1.5 whitespace-nowrap rounded px-2.5 text-xs font-black uppercase tracking-wider text-[#241F1A] transition-colors hover:bg-gray-100"
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">{t('exportCsv')}</span>
-          </button>
-          <button
-            type="button"
-            onClick={onShare}
-            title={t('share')}
-            className="flex h-full items-center justify-center gap-1.5 whitespace-nowrap rounded px-2.5 text-xs font-black uppercase tracking-wider text-[#241F1A] transition-colors hover:bg-gray-100"
-          >
-            <Share2 className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">{t('share')}</span>
-          </button>
-        </div>
       </div>
     </div>
   );

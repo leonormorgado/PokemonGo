@@ -7,7 +7,11 @@ import {
   useUpdateTags,
 } from './useCaughtRecords.js';
 
-// Single entry point for trainer-owned Pokédex state: catch/release, bulk release, notes, and tags.
+/**
+ * Single entry point composing all trainer-owned Pokédex mutations (catch/release, bulk
+ * release, notes, tags) so components depend on one hook instead of six, and any future
+ * cross-cutting logic (e.g. optimistic updates) only needs to change in one place.
+ */
 export function usePokedexStorage() {
   const { data: caughtRecords = [], isLoading } = useCaughtRecords();
   const catchMutation = useCatchPokemon();

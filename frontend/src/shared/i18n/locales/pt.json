@@ -16,6 +16,8 @@
     "caughtOnly": "Apenas capturados",
     "exportCsv": "Exportar CSV",
     "share": "Partilhar",
+    "shareDeck": "Partilhar Baralho",
+    "sharedDeckBanner": "A Ver Coleção do Treinador ({{count}}/{{total}} Capturados)",
     "shareStatus": {
       "shared": "Partilhado!",
       "copied": "Copiado para a área de transferência",
@@ -24,6 +26,7 @@
     "viewGrid": "Grelha",
     "viewTable": "Tabela",
     "loading": "A carregar Pokédex...",
+    "sorting": "A ordenar todos...",
     "selectedCount": "{{count}} selecionados",
     "releaseSelected": "Libertar selecionados",
     "clearSelection": "Limpar",
@@ -33,13 +36,19 @@
     "sortOptions": {
       "nameAsc": "Nome (A-Z)",
       "nameDesc": "Nome (Z-A)",
+      "idAsc": "Nº Dex (Menor-Maior)",
+      "idDesc": "Nº Dex (Maior-Menor)",
       "caughtAtDesc": "Capturados Recentemente",
       "caughtAtAsc": "Capturados Há Mais Tempo",
       "heightAsc": "Altura (Menor-Maior)",
       "heightDesc": "Altura (Maior-Menor)"
     },
     "typeFilter": "Tipos",
-    "clearTypeFilter": "Limpar"
+    "clearTypeFilter": "Limpar",
+    "idFilter": "Nº Dex",
+    "loadMore": "Carregar mais",
+    "loadingMore": "A carregar...",
+    "loadMoreCount": "A mostrar {{count}} de {{total}}"
   },
   "card": {
     "caught": "Capturado",
@@ -54,6 +63,7 @@
       "copied": "Link copiado!"
     },
     "notAddedToPokedex": "Ainda não adicionado à Pokédex",
+    "firstAdded": "Adicionado pela primeira vez a {{date}}",
     "shuffleColorScheme": "Baralhar Esquema de Cores",
     "statAbbr": {
       "hp": "PV",
@@ -71,19 +81,24 @@
     "release": "Libertar",
     "columns": {
       "select": "",
+      "dex": "#",
       "status": "Estado",
       "name": "Nome",
       "types": "Tipos",
       "caughtAt": "Capturado",
-      "hp": "PV",
-      "attack": "Ataque",
-      "defense": "Defesa",
-      "speed": "Velocidade",
-      "height": "Altura",
-      "weight": "Peso"
+      "stats": "BST"
     },
     "loadingCell": "…",
-    "emptyCell": "—"
+    "emptyCell": "—",
+    "prevPage": "Anterior",
+    "nextPage": "Seguinte",
+    "firstPage": "Primeira página",
+    "lastPage": "Última página",
+    "rowsPerPage": "Linhas por página",
+    "loadingMore": "A carregar...",
+    "pageIndicator": "Página {{page}} de {{pageCount}}",
+    "goToPage": "Ir para a página",
+    "jumpingToPage": "A apanhar todos..."
   },
   "detail": {
     "loading": "A carregar detalhes...",
@@ -112,6 +127,12 @@
   },
   "progress": {
     "caughtCount": "Capturados: {{caught}} / {{total}}"
+  },
+  "emptyDeck": {
+    "title": "O teu deck está vazio!",
+    "subtitle": "Vai capturar alguns Pokémon para começares a tua coleção.",
+    "noResultsTitle": "Nenhum resultado encontrado!",
+    "noResultsSubtitle": "Nenhum Pokémon corresponde à tua pesquisa/filtros atuais."
   },
   "offline": {
     "offlineMode": "Modo offline — a mostrar dados em cache",
