@@ -7,6 +7,7 @@ export function createPokemonRouter(service: PokemonService): Router {
   const controller = new PokemonController(service);
 
   router.get('/', controller.list);
+  router.get('/types/:type/count', controller.countByType);
   router.get('/:name', controller.getByName);
 
   return router;

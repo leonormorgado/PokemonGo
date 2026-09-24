@@ -4,6 +4,10 @@ export interface PokeApiListResponse {
   results: Array<{ name: string; url: string }>;
 }
 
+export interface PokeApiTypeResponse {
+  pokemon: Array<{ pokemon: { name: string; url: string } }>;
+}
+
 export interface PokeApiTypeSlot {
   type: { name: string };
 }
