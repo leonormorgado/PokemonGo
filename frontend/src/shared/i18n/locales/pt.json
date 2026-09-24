@@ -68,6 +68,7 @@
     "loadMoreError": "Falha ao carregar mais Pokémon",
     "retry": "Tentar novamente",
     "selectedCount": "{{count}} selecionados",
+    "selectAll": "Selecionar todos",
     "releaseSelected": "Libertar selecionados",
     "clearSelection": "Limpar",
     "selectMultiple": "Libertar Vários",
@@ -115,7 +116,6 @@
     }
   },
   "table": {
-    "selectAllAria": "Selecionar todos os Pokémon capturados",
     "caught": "Capturado",
     "catch": "Capturar",
     "release": "Libertar",

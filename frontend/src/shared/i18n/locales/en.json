@@ -68,6 +68,7 @@
     "loadMoreError": "Failed to load more Pokémon",
     "retry": "Retry",
     "selectedCount": "{{count}} selected",
+    "selectAll": "Select all",
     "releaseSelected": "Release selected",
     "clearSelection": "Clear",
     "selectMultiple": "Bulk Release",
@@ -115,7 +116,6 @@
     }
   },
   "table": {
-    "selectAllAria": "Select all caught Pokémon",
     "caught": "Caught",
     "catch": "Catch",
     "release": "Release",

@@ -222,3 +222,9 @@ Vitest + React Testing Library. `setup.ts` imports `@testing-library/jest-dom/vi
 - **Context**: The PWA manifest referenced icon files that were missing.
 - **Decision**: Add 192px and 512px Pokéball icons and a matching SVG favicon.
 - **Consequences**: The manifest now points to real assets without adding a package dependency.
+
+**ADR-018: Select All from the Shared Bulk Action Bar**
+
+- **Context**: A select-all control in the table header was unavailable in grid view and only covered the current table page.
+- **Decision**: Put Select all in the bulk action bar that appears after a caught Pokémon is selected. With no search or type filter, it selects every locally caught Pokémon. With filters, it selects caught Pokémon in the currently loaded matching results. Keep selections when switching views or pages; remove them when the Pokémon is released.
+- **Consequences**: Grid and table share the same bulk selection action. Filtered results that have not loaded yet are not included until they become available.

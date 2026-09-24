@@ -228,12 +228,12 @@ export function PokedexDashboard({
   };
 
   useEffect(() => {
-    const caughtIds = new Set(catalog.filter((item) => item.caught).map((item) => item.id));
+    const caughtIds = new Set(caughtRecords.filter((record) => record.caught).map((record) => record.pokemonId));
     setSelectedIds((current) => {
       const next = new Set([...current].filter((id) => caughtIds.has(id)));
       return next.size === current.size ? current : next;
     });
-  }, [catalog]);
+  }, [caughtRecords]);
 
   const toggleSelected = (entry: CatalogEntry) => {
     setSelectedIds((current) => {
@@ -274,6 +274,15 @@ export function PokedexDashboard({
     () => caughtRecords.filter((record) => record.pokemonId > 0 && record.caught),
     [caughtRecords],
   );
+
+  const selectableIds = debouncedSearch || selectedTypes.length > 0
+    ? visibleCatalog.filter((entry) => entry.caught).map((entry) => entry.id)
+    : validCaughtRecords.map((record) => record.pokemonId);
+  const allSelectableSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id));
+
+  const selectAll = () => {
+    setSelectedIds((current) => new Set([...current, ...selectableIds]));
+  };
 
   // Independent of `catalog` (which is scoped to the active search/type filter), so the progress
   // overview's type breakdown always reflects every caught Pokémon, not just the filtered subset.
@@ -547,7 +556,15 @@ export function PokedexDashboard({
           <span className="whitespace-nowrap text-xs font-black uppercase tracking-wider">
             {t('selectedCount', { count: selectedIds.size })}
           </span>
-          <div className="flex w-full items-center gap-3 sm:contents sm:w-auto">
+          <div className="flex w-full flex-wrap items-center justify-center gap-2 sm:contents sm:w-auto">
+            <button
+              type="button"
+              onClick={selectAll}
+              disabled={allSelectableSelected || selectableIds.length === 0}
+              className="flex flex-1 items-center justify-center whitespace-nowrap rounded border-2 border-[#241F1A] bg-[#E8AEEC] px-3 py-2 text-xs font-black uppercase tracking-wider text-[#241F1A] shadow-[2px_2px_0px_0px_rgba(36,31,26,1)] transition-all hover:opacity-90 active:translate-x-0.5 active:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none"
+            >
+              {t('selectAll')}
+            </button>
             <button
               type="button"
               onClick={() => void handleReleaseSelected()}
