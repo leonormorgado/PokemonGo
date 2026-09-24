@@ -1,6 +1,7 @@
 import type { PaginatedResult, Pokemon, PokemonSummary } from '../../domain/entities/pokemon.entity.js';
 import type { PokemonRepository } from '../../domain/repositories/pokemon.repository.js';
 import type { HttpClient } from '../http-clients/http-client.js';
+import { HttpClientError } from '../http-clients/http-client.js';
 import type {
   PokeApiListResponse,
   PokeApiPokemonResponse,
@@ -139,8 +140,10 @@ export class PokeApiRepository implements PokemonRepository {
         `/pokemon/${name.toLowerCase()}`,
       );
       return toDomainPokemon(raw);
-    } catch {
-      return null;
+    } catch (error) {
+      // Only a true 404 means "no such Pokémon" — timeouts/5xx must surface as upstream errors.
+      if (error instanceof HttpClientError && error.status === 404) return null;
+      throw error;
     }
   }
 
