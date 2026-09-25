@@ -4,6 +4,7 @@ import { Shuffle, Ruler, Weight, BadgeCheck, Sparkles } from 'lucide-react';
 import { usePokemonDetail } from '../hooks/usePokemonDetail.js';
 import { useTranslations } from '../../../shared/hooks/useTranslations.js';
 import { RetroLoader } from '../../../shared/components/RetroLoader.js';
+import { RetroImage } from '../../../shared/components/RetroImage.js';
 import { setSharedDeckTitle } from '../../../shared/lib/shared-deck-title.store.js';
 import { colors, typeColors, DEFAULT_TYPE_COLOR } from '../../../shared/styles/colors.js';
 import type { PokemonStats } from '../domain/pokemon.types.js';
@@ -192,13 +193,11 @@ export function SharedPokemonPage() {
                   >
                     <div className="absolute inset-0 pointer-events-none" style={gridStyle(`${colors.inkBlack}22`)} />
                     <div className="absolute inset-0 pointer-events-none" style={halftoneStyle(colors.inkBlack, 8, 0.1)} />
-                    {detail.sprite && (
-                      <img
-                        src={detail.sprite}
-                        alt={detail.name}
-                        className="relative z-10 h-52 w-52 object-contain drop-shadow-[3px_3px_0_rgba(0,0,0,0.35)]"
-                      />
-                    )}
+                    <RetroImage
+                      src={detail.sprite}
+                      alt={detail.name}
+                      className="relative z-10 h-52 w-52 object-contain drop-shadow-[3px_3px_0_rgba(0,0,0,0.35)]"
+                    />
                   </div>
                 </div>
 

@@ -1,6 +1,7 @@
 import { memo, useState, type MouseEvent } from 'react';
 import { Share2 } from 'lucide-react';
 import { useTranslations } from '../../../shared/hooks/useTranslations.js';
+import { RetroImage } from '../../../shared/components/RetroImage.js';
 import type { CatalogEntry } from '../domain/pokemon.types.js';
 import { ShareDeckModal } from './ShareDeckModal.js';
 import { TypeBadge } from './TypeBadge.js';
@@ -126,16 +127,12 @@ function PokemonCardComponent({
         aria-label={canSelect ? t('selectAria', { name: entry.name }) : t('viewDetails', { name: entry.name })}
       >
         <div className="relative mx-auto flex h-24 w-full items-center justify-center overflow-hidden rounded-lg border-2 border-[#241F1A] bg-[#E8B6BC]/20 p-2 shadow-[2px_2px_0px_0px_rgba(36,31,26,0.2)] group-hover:bg-[#E8B6BC]/40">
-          {entry.sprite ? (
-            <img
-              src={entry.sprite}
-              alt={entry.name}
-              className="relative z-10 h-20 w-20 object-contain drop-shadow-[2px_2px_0_rgba(0,0,0,0.25)] transition-transform group-hover:scale-105"
-              loading="lazy"
-            />
-          ) : (
-            <div className="h-20 w-20 bg-gray-100" />
-          )}
+          <RetroImage
+            src={entry.sprite}
+            alt={entry.name}
+            className="relative z-10 h-20 w-20 object-contain drop-shadow-[2px_2px_0_rgba(0,0,0,0.25)] transition-transform group-hover:scale-105"
+            loading="lazy"
+          />
         </div>
 
         <p className="mt-2 truncate text-sm font-black uppercase tracking-wider text-[#241F1A]">

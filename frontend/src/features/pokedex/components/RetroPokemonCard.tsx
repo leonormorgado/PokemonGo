@@ -2,6 +2,7 @@ import { memo, useMemo, useState } from 'react';
 import { CalendarDays, Ruler, Shuffle, Weight, FileText, Share2 } from 'lucide-react';
 import { colors, typeColors, DEFAULT_TYPE_COLOR } from '../../../shared/styles/colors.js';
 import { useTranslations } from '@/shared/hooks/useTranslations.js';
+import { RetroImage } from '@/shared/components/RetroImage.js';
 
 export interface RetroPokemonStats {
   hp: number;
@@ -249,7 +250,7 @@ function RetroPokemonCardComponent({
           >
             <div className="absolute inset-0 pointer-events-none" style={gridStyle(`${colors.inkBlack}22`)} />
             <div className="absolute inset-0 pointer-events-none" style={halftoneStyle(colors.inkBlack, 8, 0.1)} />
-            <img
+            <RetroImage
               src={pokemon.imageUrl}
               alt={pokemon.name}
               loading="lazy"
