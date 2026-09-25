@@ -60,4 +60,4 @@ frontend/   React single-page app and installable PWA
 backend/    Express API and PokéAPI adapter
 ```
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the detailed codebase guide and [DECISIONS.md](DECISIONS.md) for design decisions.
+See [DECISIONS.md](DECISIONS.md) for design decisions and codebase guide.
