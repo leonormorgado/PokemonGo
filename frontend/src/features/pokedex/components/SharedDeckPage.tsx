@@ -4,7 +4,7 @@ import { deckShareApi, type SharedDeck } from '../api/deck-share.api.js';
 import { useTranslations } from '../../../shared/hooks/useTranslations.js';
 import { setSharedDeckTitle } from '../../../shared/lib/shared-deck-title.store.js';
 import { RetroLoader } from '../../../shared/components/RetroLoader.js';
-import { OfflineImage } from '../../../shared/components/OfflineImage.js';
+import { RetroImage } from '../../../shared/components/RetroImage.js';
 
 const PAGE_SIZE = 24;
 
@@ -28,9 +28,10 @@ function SharedPokemonSprite({ src, alt }: { src: string; alt: string }) {
   return (
     <div className="relative mx-auto h-32 w-32">
       {!loaded && <SpriteLoader />}
-      <OfflineImage
+      <RetroImage
         src={src}
         alt={alt}
+        loading="lazy"
         onLoad={() => setLoaded(true)}
         className={`h-32 w-32 object-contain transition-opacity ${loaded ? 'opacity-100' : 'opacity-0'}`}
       />
